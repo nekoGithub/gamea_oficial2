@@ -1,0 +1,225 @@
+// 
+// Flat Theme Mode - VERSIÓN INSTITUCIONAL EL ALTO
+//
+
+$theme-flat-colors: (
+    "primary":   #D32F2F,  // Rojo institucional El Alto
+    "secondary": #546E7A,  // Gris azulado neutro
+    "success":   #4CAF50,  // Verde institucional
+    "info":      #26C6DA,  // Cyan institucional El Alto
+    "warning":   #FF9800,  // Naranja institucional
+    "danger":    #D32F2F,  // Rojo institucional
+    "purple":    #7B1FA2,  // Morado profesional
+);
+
+@if $theme-flat ==true {
+
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+    html[data-skin="flat"] {
+
+        --#{$prefix}font-sans-serif:        "Nunito", sans-serif;
+        --#{$prefix}font-family-secondary:  "Nunito", sans-serif;
+
+        --#{$prefix}body-font-size:               0.875rem;
+        --#{$prefix}body-bg:               #ffffff;
+        --#{$prefix}secondary-bg:          #fbfbfd;
+
+        --#{$prefix}theme-card-border-width:                 1px;
+        --#{$prefix}border-color:               #edf2f9;
+
+        --#{$prefix}font-weight-medium:      500;
+        --#{$prefix}font-weight-semibold:    700;
+        --#{$prefix}font-weight-bold:        700;
+
+        --#{$prefix}font-size-xxs:          12px;
+        --#{$prefix}font-size-xs:           13px;
+        --#{$prefix}font-size-base:         0.875rem;
+        --#{$prefix}font-size-md:           15px;
+        --#{$prefix}font-size-lg:           16px;
+        --#{$prefix}font-size-xl:           18px;
+        --#{$prefix}font-size-xxl:          20px;
+        
+        // Menu items
+        --#{$prefix}sidenav-item-icon-size:                  1.125rem;
+        --#{$prefix}sidenav-item-gap:                        12px;
+        --#{$prefix}sidenav-item-padding-x:                  10px;
+        --#{$prefix}sidenav-item-padding-y:                  10px;
+        --#{$prefix}sidenav-item-font-size:                  0.875rem;
+        --#{$prefix}sidenav-item-font-weight:                500;
+
+        // Sub Menu Items
+        --#{$prefix}sidenav-sub-item-font-size:              0.875rem;
+        --#{$prefix}sidenav-sub-item-font-weight:            500;
+        --#{$prefix}sidenav-sub-item-gap:                    4px;
+        --#{$prefix}sidenav-sub-item-padding-x:              10px;
+        --#{$prefix}sidenav-sub-item-padding-y:              7px;
+
+        // Chart Colors - INSTITUCIONAL
+        --#{$prefix}chart-primary:                           #D32F2F;
+        --#{$prefix}chart-primary-rgb:                       #{to-rgb(#D32F2F)};
+        --#{$prefix}chart-secondary:                         #26C6DA;
+        --#{$prefix}chart-secondary-rgb:                     #{to-rgb(#26C6DA)};
+        --#{$prefix}chart-gray:                              #B0BEC5;
+        --#{$prefix}chart-gray-rgb:                          #{to-rgb(#B0BEC5)};
+        --#{$prefix}chart-dark:                              #1976D2;
+        --#{$prefix}chart-dark-rgb:                          #{to-rgb(#1976D2)};
+        --#{$prefix}chart-border-color:                      #ecf4fc;
+        --#{$prefix}chart-title-color:                      #bbcae1;
+
+        // Background Light left-sidebar - INSTITUCIONAL
+        &[data-menu-color="light"] {
+            --#{$prefix}sidenav-bg:                       #{$white};
+            --#{$prefix}sidenav-border-color:             #edf2f9;
+            --#{$prefix}sidenav-item-color:               #{$gray-700};
+            --#{$prefix}sidenav-item-hover-color:         #D32F2F;  // Rojo institucional
+            --#{$prefix}sidenav-item-hover-bg:          #ffebee;    // Fondo rojo claro
+            --#{$prefix}sidenav-item-active-color:        #D32F2F;  // Rojo institucional
+            --#{$prefix}sidenav-item-active-bg:         #ffebee;    // Fondo rojo claro
+        }
+
+        // Background Gray left-sidebar - INSTITUCIONAL
+        &[data-menu-color="gray"] {
+            --#{$prefix}sidenav-bg:                       #f1f2f7;
+            --#{$prefix}sidenav-border-color:             #e7e9eb;
+            --#{$prefix}sidenav-item-color:               #{$gray-700};
+            --#{$prefix}sidenav-item-hover-color:         #D32F2F;  // Rojo institucional
+            --#{$prefix}sidenav-item-hover-bg:          #ffebee;    // Fondo rojo claro
+            --#{$prefix}sidenav-item-active-color:        #D32F2F;  // Rojo institucional
+            --#{$prefix}sidenav-item-active-bg:         #ffebee;    // Fondo rojo claro
+        }
+
+        // Dark Left Sidebar - INSTITUCIONAL
+        &[data-menu-color="dark"] {
+            --#{$prefix}sidenav-bg:                     #1b2e4a;
+            --#{$prefix}sidenav-border-color:           #1b2e4a;
+            --#{$prefix}sidenav-item-color:             #8495ab;
+            --#{$prefix}sidenav-item-hover-color:       #26C6DA;  // Cyan institucional
+            --#{$prefix}sidenav-item-hover-bg:          #1e3a52;
+            --#{$prefix}sidenav-item-active-color:      #26C6DA;  // Cyan institucional
+            --#{$prefix}sidenav-item-active-bg:         #1e3a52;
+        }
+
+        // Gradient Menu - INSTITUCIONAL
+        &[data-menu-color="gradient"] {
+            --#{$prefix}sidenav-bg:                       #{linear-gradient(135deg, #B71C1C, #D32F2F)};
+            --#{$prefix}sidenav-border-color:             null;
+            --#{$prefix}sidenav-item-color:             #ffcdd2;
+            --#{$prefix}sidenav-item-hover-color:       #ffffff;
+            --#{$prefix}sidenav-item-hover-bg:          rgba(255, 255, 255, 0.1);
+            --#{$prefix}sidenav-item-active-color:      #ffffff;
+            --#{$prefix}sidenav-item-active-bg:         rgba(255, 255, 255, 0.15);
+        }
+
+        // Image Menu - INSTITUCIONAL
+        &[data-menu-color="image"] {
+            --#{$prefix}sidenav-bg:                       #{linear-gradient(to bottom right, rgba(211,47,47,0.85), rgba(25,118,210,0.85)), url('/images/sidenav-bg.jpg') center/cover no-repeat};
+            --#{$prefix}sidenav-border-color:             null;
+            --#{$prefix}sidenav-item-color:             #ffffff;
+            --#{$prefix}sidenav-item-hover-color:       #26C6DA;
+            --#{$prefix}sidenav-item-hover-bg:          rgba(255, 255, 255, 0.1);
+            --#{$prefix}sidenav-item-active-color:      #26C6DA;
+            --#{$prefix}sidenav-item-active-bg:         rgba(255, 255, 255, 0.15);
+        }
+
+        // Dark Mode - INSTITUCIONAL
+        &[data-bs-theme="dark"][data-menu-color="dark"],
+        &[data-bs-theme="dark"][data-menu-color="light"],
+        &[data-bs-theme="dark"][data-menu-color="gray"] {
+            --#{$prefix}sidenav-bg:                     #1e1f27;
+            --#{$prefix}sidenav-border-color:           #2c2d38;
+            --#{$prefix}sidenav-item-color:             #8495ab;
+            --#{$prefix}sidenav-item-hover-color:       #26C6DA;
+            --#{$prefix}sidenav-item-hover-bg:          #2f3742;
+            --#{$prefix}sidenav-item-active-color:      #26C6DA;
+            --#{$prefix}sidenav-item-active-bg:         #22232c;
+        }
+
+        // Light Topbar - INSTITUCIONAL
+        &[data-topbar-color="light"] {
+            --#{$prefix}topbar-bg:                      #ffffff;
+            --#{$prefix}topbar-item-color:                #{$gray-700};
+            --#{$prefix}topbar-item-hover-color:          #D32F2F;
+            --#{$prefix}topbar-search-bg:                 transparent;
+            --#{$prefix}topbar-search-border:           #e7e9eb;
+        }
+
+        // Gray Topbar - INSTITUCIONAL
+        &[data-topbar-color="gray"] {
+            --#{$prefix}topbar-bg:                      #f1f2f7;
+            --#{$prefix}topbar-item-color:                #{$gray-700};
+            --#{$prefix}topbar-item-hover-color:          #D32F2F;
+            --#{$prefix}topbar-search-bg:               #e8e9ef;
+            --#{$prefix}topbar-search-border:           #e8e9ef;
+        }
+
+        // Dark Topbar - INSTITUCIONAL
+        &[data-topbar-color="dark"] {
+            --#{$prefix}topbar-bg:                      #1b2e4a;
+            --#{$prefix}topbar-item-color:              #adb5bf;
+            --#{$prefix}topbar-item-hover-color:        #26C6DA;
+            --#{$prefix}topbar-search-bg:               #32435c;
+            --#{$prefix}topbar-search-border:           #32435c;
+        }
+
+        // Gradient Topbar - INSTITUCIONAL
+        &[data-topbar-color="gradient"] {
+            --#{$prefix}topbar-bg:                       #{linear-gradient(to right, #D32F2F, #1976D2)};
+            --#{$prefix}topbar-item-color:              rgba(255, 255, 255, 0.85);
+            --#{$prefix}topbar-item-hover-color:        #ffffff;
+            --#{$prefix}topbar-search-bg:               rgba(255, 255, 255, 0.15);
+            --#{$prefix}topbar-search-border:           rgba(255, 255, 255, 0.15);
+        }
+
+        // Topbar (Dark Mode) - INSTITUCIONAL
+        &[data-bs-theme="dark"][data-topbar-color="dark"],
+        &[data-bs-theme="dark"][data-topbar-color="light"],
+        &[data-bs-theme="dark"][data-topbar-color="gray"] {
+            --#{$prefix}topbar-bg:                      #252630;
+            --#{$prefix}topbar-item-color:              #adb5bf;
+            --#{$prefix}topbar-item-hover-color:        #26C6DA;
+            --#{$prefix}topbar-search-bg:               #2d2e3c;
+            --#{$prefix}topbar-search-border:           #2d2e3c;
+        }
+
+        @each $name, $value in $theme-flat-colors {
+            --#{$prefix}#{$name}: #{$value};
+        }
+
+        @each $name, $value in $theme-flat-colors {
+            --#{$prefix}#{$name}-rgb: #{to-rgb($value)};
+        }
+
+        @each $name, $value in $theme-flat-colors {
+            --#{$prefix}#{$name}-bg-subtle: #{rgba($value, 0.15)};
+        }
+
+        @each $name, $value in $theme-flat-colors {
+            --#{$prefix}#{$name}-border-subtle: #{rgba($value, 0.3)};
+        }
+
+        @each $name, $value in $theme-flat-colors {
+            --#{$prefix}#{$name}-text-emphasis: #{shade-color($value, 25%)};
+        }
+    }
+
+    @if $enable-dark-mode {
+        @include color-mode(dark, true) {
+            &[data-skin="flat"] {
+                --#{$prefix}body-bg:                     #{#17181e};
+                --#{$prefix}body-bg-rgb:                 #{to-rgb(#17181e)};
+
+                --#{$prefix}secondary-bg:                #{#1b1c22};
+                --#{$prefix}secondary-bg-rgb:            #{to-rgb(#1b1c22)};
+
+                --#{$prefix}box-shadow:                  #{0px 0px 30px rgba(0, 0, 0, 0.3)};
+
+                --#{$prefix}border-color:                 #293036;
+
+                --#{$prefix}chart-border-color:                      #242c31;
+                --#{$prefix}chart-gray:                              #546E7A;
+                --#{$prefix}chart-gray-rgb:                          #{to-rgb(#546E7A)};
+            }
+        }
+    }
+}

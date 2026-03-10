@@ -1,0 +1,132 @@
+// 
+// Default Theme Mode - VERSIÓN INSTITUCIONAL EL ALTO
+//
+
+@if $theme-default ==true {
+
+    // Background Light left-sidebar - INSTITUCIONAL
+    html[data-menu-color="light"] {
+        --#{$prefix}sidenav-bg:                       #{$white};
+        --#{$prefix}sidenav-border-color:             #{$gray-300};
+        --#{$prefix}sidenav-item-color:               #{$gray-700};
+        --#{$prefix}sidenav-item-hover-color:         #D32F2F;  // Rojo institucional
+        --#{$prefix}sidenav-item-hover-bg:          null;
+        --#{$prefix}sidenav-item-active-color:        #D32F2F;  // Rojo institucional
+        --#{$prefix}sidenav-item-active-bg:         null;
+    }
+
+    // Dark Left Sidebar - INSTITUCIONAL
+    html[data-menu-color="dark"] {
+        --#{$prefix}sidenav-bg:                     #23303c;
+        --#{$prefix}sidenav-border-color:           #23303c;
+        --#{$prefix}sidenav-item-color:             #8495ab;
+        --#{$prefix}sidenav-item-hover-color:       #26C6DA;  // Cyan institucional
+        --#{$prefix}sidenav-item-hover-bg:          #2f3742;
+        --#{$prefix}sidenav-item-active-color:      #26C6DA;  // Cyan institucional
+        --#{$prefix}sidenav-item-active-bg:         #1c262f;
+    }
+
+    // Background Gray left-sidebar - INSTITUCIONAL
+    html[data-menu-color="gray"] {
+        --#{$prefix}sidenav-bg:                       #e9ebef;
+        --#{$prefix}sidenav-border-color:             #e7e9eb;
+        --#{$prefix}sidenav-item-color:               #{$gray-700};
+        --#{$prefix}sidenav-item-hover-color:         #D32F2F;  // Rojo institucional
+        --#{$prefix}sidenav-item-hover-bg:          #ffebee;    // Fondo rojo claro
+        --#{$prefix}sidenav-item-active-color:        #D32F2F;  // Rojo institucional
+        --#{$prefix}sidenav-item-active-bg:         #ffebee;    // Fondo rojo claro
+    }
+
+    // Gradient Menu - INSTITUCIONAL
+    html[data-menu-color="gradient"] {
+        --#{$prefix}sidenav-bg:                       #{linear-gradient(135deg, #B71C1C, #D32F2F)};  // Gradiente rojo institucional
+        --#{$prefix}sidenav-border-color:             null;
+        --#{$prefix}sidenav-item-color:             #ffcdd2;  // Rosa claro
+        --#{$prefix}sidenav-item-hover-color:       #ffffff;
+        --#{$prefix}sidenav-item-hover-bg:          rgba(255, 255, 255, 0.1);
+        --#{$prefix}sidenav-item-active-color:      #ffffff;
+        --#{$prefix}sidenav-item-active-bg:         rgba(255, 255, 255, 0.15);
+    }
+
+    // Image Menu - INSTITUCIONAL
+    html[data-menu-color="image"] {
+        --#{$prefix}sidenav-bg:                       #{linear-gradient(to bottom right, rgba(211,47,47,0.85), rgba(25,118,210,0.85)), url('/images/sidenav-bg.jpg') center/cover no-repeat};
+        --#{$prefix}sidenav-border-color:             null;
+        --#{$prefix}sidenav-item-color:             #ffffff;
+        --#{$prefix}sidenav-item-hover-color:       #26C6DA;  // Cyan institucional
+        --#{$prefix}sidenav-item-hover-bg:          rgba(255, 255, 255, 0.1);
+        --#{$prefix}sidenav-item-active-color:      #26C6DA;  // Cyan institucional
+        --#{$prefix}sidenav-item-active-bg:         rgba(255, 255, 255, 0.15);
+    }
+
+    // Dark Mode - INSTITUCIONAL
+    html[data-bs-theme="dark"][data-menu-color="dark"],
+    html[data-bs-theme="dark"][data-menu-color="gray"],
+    html[data-bs-theme="dark"][data-menu-color="light"] {
+        --#{$prefix}sidenav-bg:                     #1e1f27;
+        --#{$prefix}sidenav-border-color:           #2c2d38;
+        --#{$prefix}sidenav-item-color:             #8495ab;
+        --#{$prefix}sidenav-item-hover-color:       #26C6DA;  // Cyan institucional
+        --#{$prefix}sidenav-item-hover-bg:          #2f3742;
+        --#{$prefix}sidenav-item-active-color:      #26C6DA;  // Cyan institucional
+        --#{$prefix}sidenav-item-active-bg:         #22232c;
+    }
+
+    // Light Topbar - INSTITUCIONAL
+    html[data-topbar-color="light"] {
+        --#{$prefix}topbar-bg:                      #ffffff;
+        --#{$prefix}topbar-item-color:                #{$gray-700};
+        --#{$prefix}topbar-item-hover-color:          #D32F2F;  // Rojo institucional
+        --#{$prefix}topbar-search-bg:                 transparent;
+        --#{$prefix}topbar-search-border:           #e7e9eb;
+    }
+
+    // Gray Topbar - INSTITUCIONAL
+    html[data-topbar-color="gray"] {
+        --#{$prefix}topbar-bg:                      #e9ebef;
+        --#{$prefix}topbar-item-color:                #{$gray-700};
+        --#{$prefix}topbar-item-hover-color:          #D32F2F;  // Rojo institucional
+        --#{$prefix}topbar-search-bg:               #e0e1e9;
+        --#{$prefix}topbar-search-border:           #e0e1e9;
+    }
+
+    // Dark Topbar - INSTITUCIONAL
+    html[data-topbar-color="dark"] {
+        --#{$prefix}topbar-bg:                      #38414a;
+        --#{$prefix}topbar-item-color:              #adb5bf;
+        --#{$prefix}topbar-item-hover-color:        #26C6DA;  // Cyan institucional
+        --#{$prefix}topbar-search-bg:               #3f4952;
+        --#{$prefix}topbar-search-border:           #3f4952;
+    }
+
+    // Gradient Topbar - INSTITUCIONAL
+    html[data-topbar-color="gradient"] {
+        --#{$prefix}topbar-bg:                        #{linear-gradient(to right, #D32F2F, #1976D2)};  // Rojo a azul institucional
+        --#{$prefix}topbar-item-color:              rgba(255, 255, 255, 0.85);
+        --#{$prefix}topbar-item-hover-color:        #ffffff;
+        --#{$prefix}topbar-search-bg:               rgba(255, 255, 255, 0.15);
+        --#{$prefix}topbar-search-border:           rgba(255, 255, 255, 0.15);
+    }
+
+    // Topbar (Dark Mode) - INSTITUCIONAL
+    html[data-bs-theme="dark"][data-topbar-color="light"],
+    html[data-bs-theme="dark"][data-topbar-color="dark"],
+    html[data-bs-theme="dark"][data-topbar-color="gray"] {
+        --#{$prefix}topbar-bg:                      #252630;
+        --#{$prefix}topbar-item-color:              #adb5bf;
+        --#{$prefix}topbar-item-hover-color:        #26C6DA;  // Cyan institucional
+        --#{$prefix}topbar-search-bg:               #2d2e3c;
+        --#{$prefix}topbar-search-border:           #2d2e3c;
+    }
+}
+
+/* Dark Mode */
+@if $enable-dark-mode {
+    @include color-mode(dark, true) {
+        --#{$prefix}light:                     #252630;
+        --#{$prefix}light-rgb:                   #{to-rgb(#252630)};
+        --#{$prefix}dark:                      #4b4d5c;
+        --#{$prefix}dark-rgb:                    #{to-rgb(#4b4d5c)};
+        --#{$prefix}box-shadow:                  #{0px 0px 30px rgba(0, 0, 0, 0.3)};
+    }
+}
