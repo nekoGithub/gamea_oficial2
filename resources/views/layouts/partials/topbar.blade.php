@@ -34,14 +34,18 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
+
             <!-- Búsqueda -->
-            <div class="app-search d-none d-xl-flex me-2">
-                <form action="/" method="GET">
-                    <input class="form-control topbar-search rounded-pill" name="q"
-                        placeholder="Buscar en GAMEA..." type="search" />
-                    <i class="app-search-icon text-muted" data-lucide="search"></i>
-                </form>
-            </div>
+            {{-- <div class="app-search d-none d-xl-flex me-2 position-relative">
+                <input class="form-control topbar-search rounded-pill" id="topbarSearch"
+                    placeholder="Buscar en GAMEA..." type="search" autocomplete="off" />
+                <i class="app-search-icon text-muted" data-lucide="search"></i>
+
+                <!-- Dropdown resultados -->
+                <div id="searchResults" class="dropdown-menu w-100 p-0 shadow"
+                    style="display:none; max-height:360px; overflow-y:auto; top:110%; left:0; min-width:360px;">
+                </div>
+            </div> --}}
 
             <!-- Notificaciones Dropdown -->
             <div class="topbar-item">
@@ -90,11 +94,10 @@
                             </div>
                         </div>
 
-                        {{-- CONTENIDO - ENLACES A PÁGINA DEDICADA --}}
+                        {{-- CONTENIDO --}}
                         <div data-simplebar="" style="max-height: 350px;">
                             @forelse($notificacionesPendientes as $notif)
                                 @php
-                                    // Determinar tipo de severidad
                                     $tipo = 'baja';
                                     if (str_contains($notif->mensaje, '[critica]')) {
                                         $tipo = 'critica';
@@ -104,7 +107,6 @@
                                         $tipo = 'media';
                                     }
 
-                                    // Limpiar mensaje
                                     $mensajeLimpio = preg_replace(
                                         '/\[(critica|alta|media|baja)\]\s*/i',
                                         '',
@@ -112,12 +114,9 @@
                                     );
                                 @endphp
 
-                                {{-- ENLACE DIRECTO A PÁGINA DE DETALLE --}}
                                 <a href="{{ route('admin.notificaciones.show', $notif) }}"
                                     class="dropdown-item notify-item border-bottom">
-
                                     <div class="d-flex align-items-start">
-                                        {{-- Icono según severidad --}}
                                         <div class="flex-shrink-0 me-2">
                                             @if ($tipo === 'critica')
                                                 <div
@@ -142,7 +141,6 @@
                                             @endif
                                         </div>
 
-                                        {{-- Contenido --}}
                                         <div class="flex-grow-1">
                                             <h6 class="mb-1 fs-sm">
                                                 @if ($notif->sistemaVersion && $notif->sistemaVersion->sistema)
@@ -160,7 +158,6 @@
                                             </small>
                                         </div>
 
-                                        {{-- Badge de severidad --}}
                                         <div class="flex-shrink-0 ms-2">
                                             @if ($tipo === 'critica')
                                                 <span class="badge badge-soft-danger badge-label">Crítica</span>
@@ -255,9 +252,10 @@
                             class="topbar-link dropdown-toggle drop-arrow-none px-2" data-bs-offset="0,19"
                             data-bs-toggle="dropdown" href="#!">
                             <!-- Avatar del Usuario -->
-                            @if (auth()->user()->avatar)
+                            @if (auth()->user()->profile_photo_path)
                                 <img alt="{{ auth()->user()->name }}" class="rounded-circle me-lg-2 d-flex"
-                                    src="{{ asset('storage/' . auth()->user()->avatar) }}" width="32" />
+                                    src="{{ asset('storage/avatars/' . auth()->user()->profile_photo_path) }}"
+                                    width="32" height="32" style="object-fit: cover;" />
                             @else
                                 <div class="avatar-sm rounded-circle d-flex align-items-center justify-content-center me-lg-2"
                                     style="background-color: #D32F2F; width: 32px; height: 32px;">
@@ -276,14 +274,9 @@
                             <i class="ti ti-chevron-down align-middle ms-1"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <!-- Header -->
-                            <div class="dropdown-header noti-title">
-                                <h6 class="text-overflow m-0">¡Bienvenido de nuevo! 👋</h6>
-                                <small class="text-muted">{{ auth()->user()->email }}</small>
-                            </div>
 
                             <!-- Mi Perfil -->
-                            <a class="dropdown-item" href="/">
+                            <a class="dropdown-item" href="{{ route('profile.show') }}">
                                 <i class="ti ti-user-circle me-1 fs-17 align-middle"></i>
                                 <span class="align-middle">Mi Perfil</span>
                             </a>
@@ -294,25 +287,7 @@
                                 <span class="align-middle">Notificaciones</span>
                             </a>
 
-                            <!-- Configuración -->
-                            <a class="dropdown-item" href="/">
-                                <i class="ti ti-settings-2 me-1 fs-17 align-middle"></i>
-                                <span class="align-middle">Configuración</span>
-                            </a>
-
-                            <!-- Centro de Ayuda -->
-                            <a class="dropdown-item" href="/">
-                                <i class="ti ti-headset me-1 fs-17 align-middle"></i>
-                                <span class="align-middle">Centro de Ayuda</span>
-                            </a>
-
                             <div class="dropdown-divider"></div>
-
-                            <!-- Bloquear Pantalla -->
-                            <a class="dropdown-item" href="/">
-                                <i class="ti ti-lock me-1 fs-17 align-middle"></i>
-                                <span class="align-middle">Bloquear Pantalla</span>
-                            </a>
 
                             <!-- Cerrar Sesión -->
                             <form method="POST" action="{{ route('logout') }}">
@@ -344,3 +319,91 @@
     </div>
 </header>
 <!-- Topbar End -->
+
+<!-- Script Búsqueda en Tiempo Real -->
+<script>
+    (function() {
+        const input = document.getElementById('topbarSearch');
+        const results = document.getElementById('searchResults');
+        if (!input || !results) return;
+
+        let timer;
+
+        input.addEventListener('input', function() {
+            clearTimeout(timer);
+            const q = this.value.trim();
+
+            if (q.length < 2) {
+                results.style.display = 'none';
+                results.innerHTML = '';
+                return;
+            }
+
+            timer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/admin/buscar?q=${encodeURIComponent(q)}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector(
+                                'meta[name="csrf-token"]')?.getAttribute(
+                                'content') ?? ''
+                        }
+                    });
+                    const data = await res.json();
+                    renderResults(data, q);
+                } catch (e) {
+                    console.error('Error en búsqueda:', e);
+                }
+            }, 300);
+        });
+
+        function renderResults(data, q) {
+            if (!data.length) {
+                results.innerHTML = `
+                <div class="dropdown-item text-center text-muted py-3">
+                    <i class="ti ti-search-off me-1"></i>
+                    Sin resultados para <strong>${escapeHtml(q)}</strong>
+                </div>`;
+                results.style.display = 'block';
+                return;
+            }
+
+            results.innerHTML = data.map(r => `
+            <a href="${r.url}" class="dropdown-item d-flex align-items-center gap-2 py-2 border-bottom">
+                <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width:34px; height:34px;">
+                    <i class="${r.icon} text-primary fs-5"></i>
+                </div>
+                <div class="overflow-hidden flex-grow-1">
+                    <div class="fw-semibold fs-sm text-truncate">${escapeHtml(r.titulo)}</div>
+                    <small class="text-muted text-truncate d-block">${escapeHtml(r.subtitulo)}</small>
+                </div>
+                <span class="badge bg-light text-secondary ms-auto flex-shrink-0 fw-normal">${escapeHtml(r.tipo)}</span>
+            </a>
+        `).join('');
+
+            results.style.display = 'block';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str ?? '';
+            return div.innerHTML;
+        }
+
+        // Cerrar al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !results.contains(e.target)) {
+                results.style.display = 'none';
+            }
+        });
+
+        // Cerrar con Escape
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                results.style.display = 'none';
+                input.blur();
+            }
+        });
+    })();
+</script>

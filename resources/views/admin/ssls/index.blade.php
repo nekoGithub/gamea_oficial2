@@ -33,9 +33,11 @@
 
                         <div class="card-header border-light justify-content-between">
                             <h4 class="card-title mb-0">Certificados SSL</h4>
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSslModal" href="#">
-                                <i class="ti ti-plus me-1"></i> Agregar SSL
-                            </a>
+                            @can('admin.ssls.store')
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSslModal" href="#">
+                                    <i class="ti ti-plus me-1"></i> Agregar SSL
+                                </a>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -171,16 +173,20 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle edit-ssl-btn"
-                                                            data-id="{{ $ssl->id }}">
-                                                            <i class="ti ti-edit fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle delete-ssl-btn"
-                                                            data-id="{{ $ssl->id }}">
-                                                            <i class="ti ti-trash fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.ssls.edit')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle edit-ssl-btn"
+                                                                data-id="{{ $ssl->id }}">
+                                                                <i class="ti ti-edit fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.ssls.destroy')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle delete-ssl-btn"
+                                                                data-id="{{ $ssl->id }}">
+                                                                <i class="ti ti-trash fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -221,37 +227,41 @@
                                                     <span class="input-group-text bg-light-subtle border-light">
                                                         <i class="ti ti-search"></i>
                                                     </span>
-                                                    <input class="form-control form-control-sm bg-light-subtle border-light"
-                                                    placeholder="ID" type="text" />
+                                                    <input
+                                                        class="form-control form-control-sm bg-light-subtle border-light"
+                                                        placeholder="ID" type="text" />
                                                 </div>
-                                            </th>                                            
+                                            </th>
                                             <th>
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text bg-light-subtle border-light">
                                                         <i class="ti ti-search"></i>
                                                     </span>
-                                                    <input class="form-control form-control-sm bg-light-subtle border-light"
-                                                    placeholder="Emisor" type="text" />
+                                                    <input
+                                                        class="form-control form-control-sm bg-light-subtle border-light"
+                                                        placeholder="Emisor" type="text" />
                                                 </div>
-                                            </th>                                                                                        
+                                            </th>
                                             <th>
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text bg-light-subtle border-light">
                                                         <i class="ti ti-search"></i>
                                                     </span>
-                                                    <input class="form-control form-control-sm bg-light-subtle border-light"
-                                                    placeholder="F. Expiración" type="text" />
+                                                    <input
+                                                        class="form-control form-control-sm bg-light-subtle border-light"
+                                                        placeholder="F. Expiración" type="text" />
                                                 </div>
-                                            </th>                                                                                                                                    
+                                            </th>
                                             <th>
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text bg-light-subtle border-light">
                                                         <i class="ti ti-search"></i>
                                                     </span>
-                                                    <input class="form-control form-control-sm bg-light-subtle border-light"
-                                                    placeholder="Fecha" type="text" />
+                                                    <input
+                                                        class="form-control form-control-sm bg-light-subtle border-light"
+                                                        placeholder="Fecha" type="text" />
                                                 </div>
-                                            </th>                                                                                                                                                                            
+                                            </th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -265,11 +275,13 @@
                                                 <td>{{ $ssl->deleted_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle restore-ssl-btn"
-                                                            data-id="{{ $ssl->id }}">
-                                                            <i class="ti ti-rotate fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.ssls.restore')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle restore-ssl-btn"
+                                                                data-id="{{ $ssl->id }}">
+                                                                <i class="ti ti-rotate fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -295,6 +307,12 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/js/datatables/datatables-ssls.js'])
+
+    <script>
+        const canEdit = @json(auth()->user()?->can('admin.ssls.edit') ?? false);
+        const canDestroy = @json(auth()->user()?->can('admin.ssls.destroy') ?? false);
+        const canRestore = @json(auth()->user()?->can('admin.ssls.restore') ?? false);
+    </script>
 
     <script>
         /* ==================== FUNCIONES DE UTILIDAD ==================== */
@@ -388,27 +406,21 @@
          * HTML de acciones para tabla activos
          */
         function accionesActivos(id) {
-            return `
-                <div class="d-flex justify-content-center gap-1">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-ssl-btn" data-id="${id}">
-                        <i class="ti ti-edit fs-lg"></i>
-                    </a>
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-ssl-btn" data-id="${id}">
-                        <i class="ti ti-trash fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (canEdit) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-ssl-btn" data-id="${id}"><i class="ti ti-edit fs-lg"></i></a>`;
+            if (canDestroy) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-ssl-btn" data-id="${id}"><i class="ti ti-trash fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
-        /**
-         * HTML de acciones para papelera
-         */
         function accionesPapelera(id) {
-            return `
-                <div class="d-flex justify-content-center">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-ssl-btn" data-id="${id}">
-                        <i class="ti ti-rotate fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center">';
+            if (canRestore) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-ssl-btn" data-id="${id}"><i class="ti ti-rotate fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         document.querySelectorAll('#addSslForm input, #editSslForm input').forEach(input => {

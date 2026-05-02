@@ -29,15 +29,15 @@ class TelegramService
             usleep($waitTime * 1000000);
         }
 
-        $maxIntentos = 5;
+        $maxIntentos = 3;
 
         for ($intento = 1; $intento <= $maxIntentos; $intento++) {
             try {
                 Log::info("🔄 Intento {$intento}/{$maxIntentos} de envío a Telegram");
 
                 $response = Http::withOptions([
-                    'timeout' => 30,
-                    'connect_timeout' => 30,
+                    'timeout' => 10,
+                    'connect_timeout' => 5,
                     'verify' => false,
                     'http_errors' => false,
                 ])->post("https://api.telegram.org/bot{$this->token}/sendMessage", [
@@ -67,7 +67,7 @@ class TelegramService
 
             // Backoff exponencial: 3, 6, 9, 12, 15 segundos
             if ($intento < $maxIntentos) {
-                $espera = $intento * 3;
+                $espera = min($intento * 2, 8);
                 Log::info("⏳ Esperando {$espera}s antes del siguiente intento...");
                 sleep($espera);
             }
@@ -223,6 +223,88 @@ El bot de alertas del Sistema ELALTO está funcionando correctamente.
         // ========== ESTADO ==========
         $message .= "━━━━━━━━━━━━━━\n\n";
         $message .= "Estado del despliegue: {$estadoEmoji} <b>" . ucfirst($data['estado']) . "</b>";
+
+        return $this->sendMessage($message);
+    }
+
+    /**
+     * Alerta inmediata — servidor caído
+     */
+    public function sendServidorInactivoAlert(string $nombre, string $ipInterna, string $ipExterna = null): bool
+    {
+        $message = "🔴 <b>ALERTA: Servidor INACTIVO</b>\n\n";
+        $message .= "━━━━━━━━━━━━━━\n\n";
+        $message .= "Servidor: <b>{$nombre}</b>\n";
+        $message .= "IP Interna: <code>{$ipInterna}</code>\n";
+        if ($ipExterna) {
+            $message .= "IP Externa: <code>{$ipExterna}</code>\n";
+        }
+        $message .= "Fecha: " . now()->format('d/m/Y H:i:s') . "\n\n";
+        $message .= "━━━━━━━━━━━━━━\n\n";
+        $message .= "⚠️ Verificar conectividad del servidor inmediatamente.";
+
+        return $this->sendMessage($message);
+    }
+
+    /**
+     * Resumen diario — servidores con problemas
+     */
+    public function sendResumenServidores(array $inactivos, array $desconocidos, string $hora): bool
+    {
+        $totalProblemas = count($inactivos) + count($desconocidos);
+
+        if ($totalProblemas === 0) return false; // No mandar si todo está bien
+
+        $message = "📊 <b>Resumen de Servidores — {$hora}</b>\n\n";
+        $message .= "━━━━━━━━━━━━━━\n\n";
+        $message .= "Fecha: " . now()->format('d/m/Y H:i') . "\n\n";
+
+        if (!empty($inactivos)) {
+            $message .= "🔴 <b>Servidores INACTIVOS (" . count($inactivos) . ")</b>\n";
+            foreach ($inactivos as $srv) {
+                $message .= "• <b>{$srv['nombre']}</b> — INT: <code>{$srv['ip_interna']}</code>";
+                if ($srv['ip_externa']) {
+                    $message .= " | EXT: <code>{$srv['ip_externa']}</code>";
+                }
+                $message .= "\n";
+            }
+            $message .= "\n";
+        }
+
+        if (!empty($desconocidos)) {
+            $message .= "⚫ <b>Sin IP Externa ({" . count($desconocidos) . "})</b>\n";
+            foreach ($desconocidos as $srv) {
+                $message .= "• <b>{$srv['nombre']}</b> — INT: <code>{$srv['ip_interna']}</code>\n";
+            }
+            $message .= "\n";
+        }
+
+        $message .= "━━━━━━━━━━━━━━\n\n";
+        $message .= "✅ Servidores activos: <b>{$this->contarActivos()}</b>\n";
+        $message .= "🔴 Servidores con problemas: <b>{$totalProblemas}</b>";
+
+        return $this->sendMessage($message);
+    }
+
+    private function contarActivos(): int
+    {
+        return \App\Models\Servidor::where('estado', 'activo')
+            ->where('disponibilidad_interna', 'ACTIVO')
+            ->count();
+    }
+
+    public function sendSistemaWebInactivoAlert(string $nombre, string $dominio, ?int $httpStatus): bool
+    {
+        $status = $httpStatus ? "HTTP {$httpStatus}" : 'Sin respuesta';
+
+        $message = "🌐 <b>ALERTA: Sistema Web INACTIVO</b>\n\n";
+        $message .= "━━━━━━━━━━━━━━\n\n";
+        $message .= "Sistema: <b>{$nombre}</b>\n";
+        $message .= "Dominio: <code>{$dominio}</code>\n";
+        $message .= "Estado HTTP: <b>{$status}</b>\n";
+        $message .= "Fecha: " . now()->format('d/m/Y H:i:s') . "\n\n";
+        $message .= "━━━━━━━━━━━━━━\n\n";
+        $message .= "⚠️ Verificar disponibilidad del sistema web.";
 
         return $this->sendMessage($message);
     }

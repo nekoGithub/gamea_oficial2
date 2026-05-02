@@ -10,6 +10,13 @@ use Illuminate\Support\Str;
 
 class AuditoriaController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.auditorias.index')->only(['index', 'datatable', 'count']);
+        $this->middleware('can:admin.auditorias.show')->only('show');
+        $this->middleware('can:admin.reportes.generar')->only('exportarPDF');
+        $this->middleware('can:admin.auditorias.index')->only('limpiar');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -129,7 +136,7 @@ class AuditoriaController extends Controller
                 e(mb_strimwidth($auditoria->descripcion, 0, 50, '...')),
                 '<code class="text-muted">' . ($auditoria->ip_address ?? '—') . '</code>',
                 '<small class="text-muted">'
-                    . $auditoria->created_at->format('d M, Y') . '<br>'
+                    . $auditoria->created_at->locale('es')->isoFormat('DD MMM, YYYY') . '<br>'
                     . '<span class="text-muted">' . $auditoria->created_at->format('H:i:s') . '</span>'
                     . '</small>',
                 $this->getAccionesHtml($auditoria->id)
@@ -178,6 +185,9 @@ class AuditoriaController extends Controller
      */
     public function exportarPDF(Request $request)
     {
+
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '512M');
         // ========== OBTENER DATOS FILTRADOS ==========
         $query = Auditoria::with('user');
 
@@ -553,5 +563,18 @@ class AuditoriaController extends Controller
         return '<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle view-auditoria-btn" data-id="' . $id . '">'
             . '<i class="ti ti-eye fs-lg"></i>'
             . '</a>';
+    }
+
+    public function count(Request $request)
+    {
+        $query = Auditoria::query();
+
+        if ($request->filled('modulo'))      $query->where('modulo', $request->modulo);
+        if ($request->filled('accion'))      $query->where('accion', $request->accion);
+        if ($request->filled('usuario'))     $query->where('user_id', $request->usuario);
+        if ($request->filled('fecha_inicio')) $query->whereDate('created_at', '>=', $request->fecha_inicio);
+        if ($request->filled('fecha_fin'))   $query->whereDate('created_at', '<=', $request->fecha_fin);
+
+        return response()->json(['total' => $query->count()]);
     }
 }

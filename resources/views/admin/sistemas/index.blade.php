@@ -65,10 +65,12 @@
 
                         <div class="card-header border-light justify-content-between">
                             <h4 class="card-title mb-0 ">Sistemas Registrados</h4>
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSistemaModal"
-                                href="#">
-                                <i class="ti ti-plus me-1"></i> Agregar Sistema
-                            </a>
+                            @can('admin.sistemas.store')
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSistemaModal"
+                                    href="#">
+                                    <i class="ti ti-plus me-1"></i> Agregar Sistema
+                                </a>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -180,6 +182,12 @@
                                                         <i class="ti ti-server fs-4 text-primary me-2"></i>
                                                         <div>
                                                             <strong>{{ $sistema->nombre }}</strong>
+                                                            @if ($sistema->descripcion)
+                                                                <div class="text-muted small mt-1" data-bs-toggle="tooltip"
+                                                                    title="{{ $sistema->descripcion }}">
+                                                                    {{ Str::limit($sistema->descripcion, 50) }}
+                                                                </div>
+                                                            @endif
                                                             @if ($sistema->sigla)
                                                                 <div>
                                                                     <span
@@ -192,8 +200,8 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <a href="https://{{ $sistema->dominio }}" target="_blank"
-                                                        class="text-decoration-none">
+                                                    <a href="{{ $sistema->ssl ? 'https' : 'http' }}://{{ $sistema->dominio }}"
+                                                        target="_blank" class="text-decoration-none">
                                                         <code class="text-primary cursor-pointer">
                                                             {{ $sistema->dominio }}
                                                             <i class="ti ti-external-link ms-1 fs-xs"></i>
@@ -263,21 +271,27 @@
                                                 <td>{{ $sistema->created_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="{{ route('admin.sistemas.versiones.index', $sistema) }}"
-                                                            class="btn btn-info btn-icon btn-sm rounded-circle"
-                                                            title="Ver versiones">
-                                                            <i class="ti ti-versions fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle edit-sistema-btn"
-                                                            data-id="{{ $sistema->id }}">
-                                                            <i class="ti ti-edit fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle delete-sistema-btn"
-                                                            data-id="{{ $sistema->id }}">
-                                                            <i class="ti ti-trash fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.versiones.index')
+                                                            <a href="{{ route('admin.sistemas.versiones.index', $sistema) }}"
+                                                                class="btn btn-info btn-icon btn-sm rounded-circle"
+                                                                title="Ver versiones">
+                                                                <i class="ti ti-versions fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.sistemas.edit')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle edit-sistema-btn"
+                                                                data-id="{{ $sistema->id }}">
+                                                                <i class="ti ti-edit fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.sistemas.destroy')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle delete-sistema-btn"
+                                                                data-id="{{ $sistema->id }}">
+                                                                <i class="ti ti-trash fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -404,11 +418,13 @@
                                                 <td>{{ $sistema->deleted_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle restore-sistema-btn"
-                                                            data-id="{{ $sistema->id }}">
-                                                            <i class="ti ti-rotate fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.sistemas.restore')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle restore-sistema-btn"
+                                                                data-id="{{ $sistema->id }}">
+                                                                <i class="ti ti-rotate fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -438,37 +454,51 @@
     @vite(['resources/js/datatables/datatables-sistemas.js'])
 
     <script>
+        const canVersiones = @json(auth()->user()?->can('admin.versiones.index') ?? false);
+        const canEdit = @json(auth()->user()?->can('admin.sistemas.edit') ?? false);
+        const canDestroy = @json(auth()->user()?->can('admin.sistemas.destroy') ?? false);
+        const canRestore = @json(auth()->user()?->can('admin.sistemas.restore') ?? false);
+    </script>
+
+    <script>
         /* ==================== FUNCIONES DE UTILIDAD ==================== */
-        function getSistemaConSiglaHtml(nombre, sigla) {
+        function getSistemaConSiglaHtml(nombre, sigla, descripcion = '') {
             let html = `
-                <div class="d-flex align-items-center">
-                    <i class="ti ti-server fs-4 text-primary me-2"></i>
-                    <div>
-                        <strong>${nombre}</strong>`;
+        <div class="d-flex align-items-center">
+            <i class="ti ti-server fs-4 text-primary me-2"></i>
+            <div>
+                <strong>${nombre}</strong>`;
 
             if (sigla) {
                 html += `
-                        <div>
-                            <span class="badge bg-secondary-subtle text-secondary mt-1">${sigla}</span>
-                        </div>`;
+            <div>
+                <span class="badge bg-secondary-subtle text-secondary mt-1">${sigla}</span>
+            </div>`;
             }
 
-            html += `
-                    </div>
-                </div>`;
+            if (descripcion) {
+                html += `
+            <div class="text-muted small mt-1">
+                ${descripcion.substring(0, 60)}
+            </div>`;
+            }
 
+            html += `</div></div>`;
             return html;
         }
 
-        function getDominioHtml(dominio) {
+        function getDominioHtml(dominio, tieneSsl = false) {
+            const protocolo = tieneSsl ? 'https' : 'http';
             return `
-                <a href="https://${dominio}" target="_blank" class="text-decoration-none">
-                    <code class="text-primary cursor-pointer">
-                        ${dominio}
-                        <i class="ti ti-external-link ms-1 fs-xs"></i>
-                    </code>
-                </a>`;
+        <a href="${protocolo}://${dominio}" target="_blank" class="text-decoration-none">
+            <code class="text-primary cursor-pointer">
+                ${dominio}
+                <i class="ti ti-external-link ms-1 fs-xs"></i>
+            </code>
+        </a>`;
         }
+
+
 
         function getTipoBadge(tipo) {
             if (Array.isArray(tipo)) {
@@ -564,27 +594,23 @@
         }
 
         function accionesActivos(id) {
-            return `
-                <div class="d-flex justify-content-center gap-1">
-                     <a href="/admin/sistemas/${id}/versiones" class="btn btn-info btn-icon btn-sm rounded-circle" title="Ver versiones">
-                        <i class="ti ti-versions fs-lg"></i>
-                    </a>
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-sistema-btn" data-id="${id}">
-                        <i class="ti ti-edit fs-lg"></i>
-                    </a>
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-sistema-btn" data-id="${id}">
-                        <i class="ti ti-trash fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (canVersiones) btns +=
+                `<a href="/admin/sistemas/${id}/versiones" class="btn btn-info btn-icon btn-sm rounded-circle" title="Ver versiones"><i class="ti ti-versions fs-lg"></i></a>`;
+            if (canEdit) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-sistema-btn" data-id="${id}"><i class="ti ti-edit fs-lg"></i></a>`;
+            if (canDestroy) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-sistema-btn" data-id="${id}"><i class="ti ti-trash fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         function accionesPapelera(id) {
-            return `
-                <div class="d-flex justify-content-center">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-sistema-btn" data-id="${id}">
-                        <i class="ti ti-rotate fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center">';
+            if (canRestore) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-sistema-btn" data-id="${id}"><i class="ti ti-rotate fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         /* ==================== LÓGICA PRINCIPAL ==================== */
@@ -720,8 +746,8 @@
 
                     window.sistemasDataTables.activos.row.add([
                         data.sistema.id,
-                        getSistemaConSiglaHtml(data.sistema.nombre, data.sistema.sigla),
-                        getDominioHtml(data.sistema.dominio),
+                        getSistemaConSiglaHtml(data.sistema.nombre, data.sistema.sigla, data.sistema.descripcion),
+                        getDominioHtml(data.sistema.dominio, !!data.sistema.ssl_id),
                         getTipoBadge(data.sistema.tipo),
                         getUnidadHtml(data.sistema.unidad?.nombre, data.sistema.unidad?.id),
                         getSslBadge(
@@ -826,8 +852,8 @@
 
                     window.sistemasDataTables.activos.row(`#sistema-${id}`).data([
                         data.sistema.id,
-                        getSistemaConSiglaHtml(data.sistema.nombre, data.sistema.sigla),
-                        getDominioHtml(data.sistema.dominio),
+                        getSistemaConSiglaHtml(data.sistema.nombre, data.sistema.sigla, data.sistema.descripcion),
+                        getDominioHtml(data.sistema.dominio, !!data.sistema.ssl_id),
                         getTipoBadge(data.sistema.tipo),
                         getUnidadHtml(data.sistema.unidad?.nombre, data.sistema.unidad?.id),
                         getSslBadge(
@@ -878,6 +904,9 @@
                         document.getElementById('editDominio').value = data.sistema.dominio;
                         document.getElementById('editUnidadId').value = data.sistema.unidad_id;
                         document.getElementById('editSslId').value = data.sistema.ssl_id || '';
+
+                        document.getElementById('editDescripcion').value = data.sistema.descripcion ?? '';
+                        
 
                         // Tipo de sistema
                         document.getElementById('editTipoInterno').checked = false;
@@ -1044,8 +1073,8 @@
 
                         dtA.row.add([
                             data.sistema.id,
-                            getSistemaConSiglaHtml(data.sistema.nombre, data.sistema.sigla),
-                            getDominioHtml(data.sistema.dominio),
+                            getSistemaConSiglaHtml(data.sistema.nombre, data.sistema.sigla, data.sistema.descripcion),
+                            getDominioHtml(data.sistema.dominio, !!data.sistema.ssl_id),
                             getTipoBadge(data.sistema.tipo),
                             getUnidadHtml(data.sistema.unidad?.nombre, data.sistema.unidad?.id),
                             getSslBadge(

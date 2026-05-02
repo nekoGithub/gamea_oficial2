@@ -36,7 +36,7 @@
                             id="editNombre"
                             name="nombre"
                             required 
-                            maxlength="100"
+                            maxlength="45"
                         >
                         <div class="invalid-feedback">El nombre es obligatorio.</div>
                     </div>

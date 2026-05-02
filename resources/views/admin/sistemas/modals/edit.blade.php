@@ -139,7 +139,7 @@
                                 </div>
 
                                 <!-- Unidad -->
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <label class="form-label fw-semibold">
                                         Unidad Organizacional <span class="text-danger">*</span>
                                     </label>
@@ -158,7 +158,7 @@
                                 </div>
 
                                 <!-- SSL (Opcional) -->
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <label class="form-label fw-semibold">
                                         Certificado SSL
                                         <span class="text-muted">(Opcional)</span>
@@ -179,6 +179,22 @@
                                         </select>
                                     </div>
                                     <small class="text-muted">Asociar un certificado SSL existente</small>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">
+                                        Descripción <span class="text-muted">(Opcional)</span>
+                                    </label>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="ti ti-align-left"></i>
+                                        </span>
+                                        <textarea class="form-control" name="descripcion" id="editDescripcion" rows="3"
+                                            placeholder="Ej. Sistema para gestión de usuarios internos..."></textarea>
+                                    </div>
+
+                                    <small class="text-muted">Descripción breve del sistema</small>
                                 </div>
 
                             </div>
@@ -232,10 +248,26 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
+        function limpiarDominio(valor) {
+            return valor
+                .replace(/^https?:\/\//i, '')
+                .replace(/^\/\//, '')
+                .trim();
+        }
+
+        document.getElementById('editDominio')?.addEventListener('input', function() {
+            this.value = limpiarDominio(this.value);
+        });
+        document.getElementById('editDominio')?.addEventListener('paste', function(e) {
+            e.preventDefault();
+            this.value = limpiarDominio((e.clipboardData || window.clipboardData).getData('text'));
+        });
+
         // Auto-uppercase en sigla EDIT
         document.getElementById('editSigla')?.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
         });
+
 
         // ================= PREVIEW DE UNIDAD EN EDIT =================
         document.getElementById('editUnidadId')?.addEventListener('change', async function() {

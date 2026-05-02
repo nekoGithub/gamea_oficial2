@@ -33,10 +33,12 @@
 
                         <div class="card-header border-light justify-content-between">
                             <h4 class="card-title mb-0">Tecnologías</h4>
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTecnologiaModal"
-                                href="#">
-                                <i class="ti ti-plus me-1"></i> Agregar Tecnología
-                            </a>
+                            @can('admin.tecnologias.store')
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTecnologiaModal"
+                                    href="#">
+                                    <i class="ti ti-plus me-1"></i> Agregar Tecnología
+                                </a>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -194,7 +196,6 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        {{-- NUEVO: Botón de scraping --}}
                                                         @if ($tec->url_documentacion)
                                                             <a href="#"
                                                                 class="btn btn-info btn-icon btn-sm rounded-circle scrape-tec-btn"
@@ -202,17 +203,20 @@
                                                                 <i class="ti ti-robot fs-lg"></i>
                                                             </a>
                                                         @endif
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle edit-tec-btn"
-                                                            data-id="{{ $tec->id }}">
-                                                            <i class="ti ti-edit fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle delete-tec-btn"
-                                                            data-id="{{ $tec->id }}">
-                                                            <i class="ti ti-trash fs-lg"></i>
-                                                        </a>
-
+                                                        @can('admin.tecnologias.edit')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle edit-tec-btn"
+                                                                data-id="{{ $tec->id }}">
+                                                                <i class="ti ti-edit fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.tecnologias.destroy')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle delete-tec-btn"
+                                                                data-id="{{ $tec->id }}">
+                                                                <i class="ti ti-trash fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -334,11 +338,13 @@
                                                 <td>{{ $tec->deleted_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle restore-tec-btn"
-                                                            data-id="{{ $tec->id }}">
-                                                            <i class="ti ti-rotate fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.tecnologias.restore')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle restore-tec-btn"
+                                                                data-id="{{ $tec->id }}">
+                                                                <i class="ti ti-rotate fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -391,6 +397,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/js/datatables/datatables-tecnologias.js'])
 
+    <script>
+        const canEdit = @json(auth()->user()?->can('admin.tecnologias.edit') ?? false);
+        const canDestroy = @json(auth()->user()?->can('admin.tecnologias.destroy') ?? false);
+        const canRestore = @json(auth()->user()?->can('admin.tecnologias.restore') ?? false);
+    </script>
 
     <script>
         /* ==================== FUNCIONES DE UTILIDAD ==================== */
@@ -446,30 +457,23 @@
         }
 
         function accionesActivos(id, tieneUrl = false) {
-            return `
-                <div class="d-flex justify-content-center gap-1">
-                    ${tieneUrl ? `
-                            <a href="#" class="btn btn-info btn-icon btn-sm rounded-circle scrape-tec-btn" 
-                               data-id="${id}" title="Scraping asistido">
-                                <i class="ti ti-robot fs-lg"></i>
-                            </a>
-                        ` : ''}
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-tec-btn" data-id="${id}">
-                        <i class="ti ti-edit fs-lg"></i>
-                    </a>
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-tec-btn" data-id="${id}">
-                        <i class="ti ti-trash fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (tieneUrl) btns +=
+                `<a href="#" class="btn btn-info btn-icon btn-sm rounded-circle scrape-tec-btn" data-id="${id}" title="Scraping asistido"><i class="ti ti-robot fs-lg"></i></a>`;
+            if (canEdit) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-tec-btn" data-id="${id}"><i class="ti ti-edit fs-lg"></i></a>`;
+            if (canDestroy) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-tec-btn" data-id="${id}"><i class="ti ti-trash fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         function accionesPapelera(id) {
-            return `
-                <div class="d-flex justify-content-center">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-tec-btn" data-id="${id}">
-                        <i class="ti ti-rotate fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center">';
+            if (canRestore) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-tec-btn" data-id="${id}"><i class="ti ti-rotate fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         function getVigenciaBadge(vigencia, diasRestantes = null) {
@@ -543,9 +547,31 @@
 
             const csrf = document.querySelector('meta[name="csrf-token"]').content;
 
+            const maxFecha = `${new Date().getFullYear() + 5}-12-31`;
+            ['addFechaLanzamiento', 'addFechaFinSoporte',
+                'editFechaLanzamiento', 'editFechaFinSoporte'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('min', '2015-01-01');
+                    el.setAttribute('max', maxFecha);
+                }
+            });
+
             /* ================= AGREGAR TECNOLOGÍA ================= */
             document.getElementById('addTecnologiaForm')?.addEventListener('submit', async function(e) {
                 e.preventDefault();
+
+
+
+                document.getElementById('addFechaLanzamiento')?.addEventListener('change', function() {
+                    document.getElementById('addFechaFinSoporte').min = this.value ||
+                        '2015-01-01';
+                });
+                document.getElementById('editFechaLanzamiento')?.addEventListener('change', function() {
+                    document.getElementById('editFechaFinSoporte').min = this.value ||
+                        '2015-01-01';
+                });
 
                 const form = this;
                 form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
@@ -722,6 +748,12 @@
 
                         document.getElementById('editFechaLanzamiento').value =
                             normalizarFecha(data.tecnologia.fecha_lanzamiento);
+
+                        const fechaLanz = normalizarFecha(data.tecnologia.fecha_lanzamiento);
+                        if (fechaLanz) {
+                            document.getElementById('editFechaFinSoporte').setAttribute('min',
+                                fechaLanz);
+                        }
 
                         document.getElementById('editFechaFinSoporte').value =
                             normalizarFecha(data.tecnologia.fecha_fin_soporte);
@@ -951,16 +983,16 @@
 
                             content.innerHTML = `
                             ${tieneAlgunDato ? `
-                                                <div class="alert alert-success">
-                                                    <i class="ti ti-check-circle me-2"></i>
-                                                    <strong>Datos encontrados exitosamente</strong>
-                                                </div>
-                                            ` : `
-                                                <div class="alert alert-warning">
-                                                    <i class="ti ti-alert-triangle me-2"></i>
-                                                    <strong>Datos parciales encontrados</strong>
-                                                </div>
-                                            `}
+                                                                                            <div class="alert alert-success">
+                                                                                                <i class="ti ti-check-circle me-2"></i>
+                                                                                                <strong>Datos encontrados exitosamente</strong>
+                                                                                            </div>
+                                                                                        ` : `
+                                                                                            <div class="alert alert-warning">
+                                                                                                <i class="ti ti-alert-triangle me-2"></i>
+                                                                                                <strong>Datos parciales encontrados</strong>
+                                                                                            </div>
+                                                                                        `}
                             
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">

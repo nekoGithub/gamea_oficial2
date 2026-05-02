@@ -157,9 +157,11 @@
                                 </div>
 
                                 {{-- Botón Agregar --}}
-                                <a href="{{ route('admin.sistemas.versiones.create', $sistema) }}" class="btn btn-primary">
-                                    <i class="ti ti-plus me-1"></i> Nueva Versión
-                                </a>
+                                @can('admin.versiones.store')
+                                    <a href="{{ route('admin.sistemas.versiones.create', $sistema) }}" class="btn btn-primary">
+                                        <i class="ti ti-plus me-1"></i> Nueva Versión
+                                    </a>
+                                @endcan
                             </div>
                         </div>
                     </div>
@@ -195,9 +197,11 @@
                             <i class="ti ti-info-circle fs-1 mb-3 d-block"></i>
                             <h5 class="mb-2">No hay versiones registradas</h5>
                             <p class="text-muted mb-3">Aún no se han creado versiones para este sistema</p>
-                            <a href="{{ route('admin.sistemas.versiones.create', $sistema) }}" class="btn btn-primary">
-                                <i class="ti ti-plus me-1"></i> Crear Primera Versión
-                            </a>
+                            @can('admin.versiones.store')
+                                <a href="{{ route('admin.sistemas.versiones.create', $sistema) }}" class="btn btn-primary">
+                                    <i class="ti ti-plus me-1"></i> Crear Primera Versión
+                                </a>
+                            @endcan
                         </div>
                     </div>
                 @endforelse

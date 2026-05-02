@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 
 class DocumentoController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('can:admin.documentos.index')->only('index');
+        $this->middleware('can:admin.documentos.store')->only('store');
+        $this->middleware('can:admin.documentos.edit')->only('edit');
+        $this->middleware('can:admin.documentos.update')->only('update');
+        $this->middleware('can:admin.documentos.destroy')->only('destroy');
+        $this->middleware('can:admin.documentos.restore')->only('restore');
+    }
     public function index()
     {
         $documentos = Documento::orderBy('id', 'desc')->get();
@@ -26,10 +36,10 @@ class DocumentoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:100|unique:documentos,nombre',
+            'nombre' => 'required|string|max:45|unique:documentos,nombre',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 100 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 45 caracteres.',
             'nombre.unique' => 'Ya existe un documento con este nombre.',
         ]);
 
@@ -57,11 +67,11 @@ class DocumentoController extends Controller
     public function update(Request $request, Documento $documento)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:100|unique:documentos,nombre,' . $documento->id,
+            'nombre' => 'required|string|max:45|unique:documentos,nombre,' . $documento->id,
             'activo' => 'boolean',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 100 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 45 caracteres.',
             'nombre.unique' => 'Ya existe un documento con este nombre.',
         ]);
 

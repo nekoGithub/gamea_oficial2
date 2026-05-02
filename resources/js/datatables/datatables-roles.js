@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pageLength: 8,
         columnDefs: [
             { targets: -1, orderable: false, searchable: false },
-            { targets: -1, orderable: false, searchable: false, responsivePriority: 1 } // acciones
+            { targets: -1, orderable: false, searchable: false, responsivePriority: 1 , className: 'text-end'} // acciones
         ],
     };
 

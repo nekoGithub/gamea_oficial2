@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 class ServidorController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.servidores.index')->only('index');
+        $this->middleware('can:admin.servidores.store')->only('store');
+        $this->middleware('can:admin.servidores.edit')->only('edit');
+        $this->middleware('can:admin.servidores.update')->only('update');
+        $this->middleware('can:admin.servidores.destroy')->only('destroy');
+        $this->middleware('can:admin.servidores.restore')->only('restore');
+    }
+
     public function index()
     {
         $servidores = Servidor::with('sistemaOperativo')
@@ -36,10 +46,11 @@ class ServidorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:150',
+            'nombre' => 'required|string|max:45',
             'ip_interna' => 'required|ip|max:45|unique:servidores,ip_interna',
             'ip_externa' => 'nullable|ip|max:45|unique:servidores,ip_externa',
             'mac_address' => 'nullable|string|max:20|regex:/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
+            'descripcion' => 'nullable|string',
             'sistema_operativo_id' => 'required|exists:sistemas_operativos,id',
             'tipo_servidor' => 'required|in:físico,virtual',
             'estado' => 'required|in:activo,inactivo',
@@ -53,6 +64,7 @@ class ServidorController extends Controller
             'ip_externa.unique' => 'Esta IP externa ya está asignada a otro servidor.',
             'mac_address.regex' => 'La dirección MAC debe tener formato válido (ej: 00:1A:2B:3C:4D:5E).',
             'mac_address.max' => 'La dirección MAC no puede exceder 20 caracteres.',
+            'descripcion.max' => 'La descripción es demasiado larga.',
             'sistema_operativo_id.required' => 'Debe seleccionar un sistema operativo.',
             'sistema_operativo_id.exists' => 'El sistema operativo seleccionado no existe.',
             'tipo_servidor.required' => 'Debe seleccionar el tipo de servidor.',
@@ -108,10 +120,11 @@ class ServidorController extends Controller
         }
 
         $validated = $request->validate([
-            'nombre' => 'required|string|max:150',
+            'nombre' => 'required|string|max:45',
             'ip_interna' => 'required|ip|max:45|unique:servidores,ip_interna,' . $servidore->id,
             'ip_externa' => 'nullable|ip|max:45|unique:servidores,ip_externa,' . $servidore->id,
             'mac_address' => 'nullable|string|max:20|regex:/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
+            'descripcion' => 'nullable|string',
             'sistema_operativo_id' => 'required|exists:sistemas_operativos,id',
             'tipo_servidor' => 'required|in:físico,virtual',
             'estado' => 'required|in:activo,inactivo',

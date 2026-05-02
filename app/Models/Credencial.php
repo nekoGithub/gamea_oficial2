@@ -13,15 +13,20 @@ class Credencial extends Model
     protected $table = 'credenciales';
 
     protected $fillable = [
+        'sistema_id',
         'usuario',
         'password_encrypted',
-        'url_acceso',
         'estado'
     ];
 
     protected $hidden = [
         'password_encrypted',
     ];
+
+    public function sistema()
+    {
+        return $this->belongsTo(Sistema::class);
+    }
 
     public function versiones()
     {

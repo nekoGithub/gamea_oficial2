@@ -43,7 +43,7 @@
                                 Versión <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="editVersion" name="version" 
-                                   required maxlength="50">
+                                   required maxlength="10">
                             <div class="invalid-feedback">La versión es obligatoria.</div>
                         </div>
 

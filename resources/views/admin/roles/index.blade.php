@@ -67,7 +67,7 @@
                                             <input class="form-control" placeholder="Fecha" type="text">
                                         </div>
                                     </th>
-                                    
+
                                     <th></th>
                                 </tr>
                             </thead>
@@ -121,6 +121,10 @@
     @vite(['resources/js/datatables/datatables-roles.js'])
 
     <script>
+        const canEdit = @json(auth()->user()?->can('admin.roles.edit') ?? false);
+    </script>
+
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const csrf = document.querySelector('meta[name="csrf-token"]').content;
 
@@ -171,11 +175,13 @@
                     const dt = window.rolesDataTable;
                     if (dt) {
                         dt.row.add([
-                            `<span class="badge bg-info">#${data.role.id}</span>`,
+                            `<span class="badge bg-primary">#${data.role.id}</span>`,
                             `<div><div class="fw-semibold">${data.role.name}</div><small class="text-muted">${data.role.name.toLowerCase().replace(/\s+/g, '-')}</small></div>`,
-                            `<span class="badge bg-info">0 permisos</span>`,
+                            `<span class="badge bg-primary">0 permisos</span>`,
                             `${new Date(data.role.created_at).toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'})}`,
-                            `<a href="/admin/roles/${data.role.id}/edit" class="btn btn-sm btn-outline-primary"><i class="ti ti-edit"></i> Editar</a>`
+                            canEdit ?
+                            `<a href="/admin/roles/${data.role.id}/edit" class="btn btn-default btn-icon btn-sm rounded-circle"><i class="ti ti-edit fs-lg"></i></a>` :
+                            ''
                         ]).draw(false);
                     }
 

@@ -23,6 +23,12 @@ use PhpOffice\PhpSpreadsheet\Style\Color;
 
 class ReporteController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.reportes.index')->only(['index', 'sistemas', 'ssl', 'servidores', 'credenciales']);
+        $this->middleware('can:admin.reportes.generar')->only(['exportarSistemasPDF', 'exportarSslPDF', 'exportarServidoresPDF', 'exportarCredencialesPDF']);
+        $this->middleware('can:admin.reportes.exportar')->only('exportarSistemasExcel');
+    }
     /**
      * Dashboard principal de reportes
      */

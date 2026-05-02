@@ -1461,3 +1461,4 @@ menuObserver.observe(document.documentElement, {
  */
 
 //import './echo';
+import './echo';

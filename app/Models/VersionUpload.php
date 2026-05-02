@@ -39,6 +39,11 @@ class VersionUpload extends Model
         'temp_manual_tecnico',
         'temp_manual_usuario',
         'temp_imagen',
+
+        'temp_archivo_bd',           
+        'archivo_bd_identifier',     
+        'archivo_bd_total_chunks',   
+        'archivo_bd_chunks_received', 
     ];
 
     protected $casts = [

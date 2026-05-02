@@ -27,11 +27,11 @@ class Rolecontroller extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:roles,name',
+            'name' => 'required|string|max:45|unique:roles,name',
         ], [
             'name.required' => 'El nombre del rol es obligatorio',
             'name.unique' => 'Ya existe un rol con este nombre',
-            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'name.max' => 'El nombre no puede exceder 45 caracteres',
         ]);
 
         if ($validator->fails()) {
@@ -87,13 +87,13 @@ class Rolecontroller extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:roles,name,' . $id,
+            'name' => 'required|string|max:45|unique:roles,name,' . $id,
             'permissions' => 'nullable|array',
             'permissions.*' => 'exists:permissions,name'
         ], [
             'name.required' => 'El nombre del rol es obligatorio',
             'name.unique' => 'Ya existe un rol con este nombre',
-            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'name.max' => 'El nombre no puede exceder 45 caracteres',
         ]);
 
         if ($validator->fails()) {

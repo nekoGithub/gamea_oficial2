@@ -16,17 +16,28 @@ class Sistema extends Model
         'nombre',
         'sigla',
         'dominio',
+        'descripcion',
         'tipo',
         'unidad_id',
         'ssl_id',
-        'estado'
+        'estado',
+        'disponibilidad_web',
+        'http_status',
+        'tiempo_respuesta',
+        'ultima_verificacion_web',
     ];
 
     protected $with = ['unidad', 'ssl'];
 
     protected $casts = [
         'tipo' => 'array',
+        'ultima_verificacion_web' => 'datetime',
     ];
+
+    public function credenciales()
+    {
+        return $this->hasMany(Credencial::class);
+    }
 
     public function unidad()
     {

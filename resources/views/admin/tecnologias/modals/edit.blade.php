@@ -59,21 +59,17 @@
 
                         <!-- Fecha Lanzamiento -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Fecha de Lanzamiento
-                            </label>
+                            <label class="form-label fw-semibold">Fecha de Lanzamiento</label>
                             <input type="date" class="form-control" id="editFechaLanzamiento"
-                                name="fecha_lanzamiento">
-                            <div class="invalid-feedback">Debe ingresar una fecha válida.</div>
+                                name="fecha_lanzamiento" min="2015-01-01">
+                            <div class="invalid-feedback">Fecha inválida (2015 - año actual +5).</div>
                         </div>
 
                         <!-- Fecha Fin Soporte -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Fecha Fin de Soporte
-                            </label>
-                            <input type="date" class="form-control" id="editFechaFinSoporte"
-                                name="fecha_fin_soporte">
+                            <label class="form-label fw-semibold">Fecha Fin de Soporte</label>
+                            <input type="date" class="form-control" id="editFechaFinSoporte" name="fecha_fin_soporte"
+                                min="2015-01-01">
                             <div class="invalid-feedback">La fecha debe ser posterior a la de lanzamiento.</div>
                         </div>
 

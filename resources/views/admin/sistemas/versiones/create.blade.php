@@ -452,7 +452,7 @@
                             </div>
 
                             {{-- Código Fuente --}}
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold">Código Fuente <span
                                         class="text-danger">*</span></label>
                                 <input type="file" name="codigo_fuente" id="codigo_fuente" class="form-control"
@@ -461,10 +461,24 @@
                                 <div class="invalid-feedback">El código fuente es obligatorio</div>
                             </div>
 
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Archivo de Base de Datos <small class="text-muted">(Opcional)</small>
+                                </label>
+                                <input type="file" name="archivo_bd" id="archivo_bd" class="form-control"
+                                    accept=".sql,.gz,.xbk,.dump,.backup,.tar,.bson,.json,.archive,.bak,.bz2,.zip">
+                                <small class="text-muted">
+                                    MySQL: .sql .gz .xbk &nbsp;|&nbsp;
+                                    PostgreSQL: .dump .backup .tar .sql &nbsp;|&nbsp;
+                                    MongoDB: .bson .json .archive &nbsp;|&nbsp;
+                                    General: .bak .zip .gz .bz2
+                                </small>
+                            </div>
+
                             {{-- Manual Técnico --}}
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Manual Técnico <span
-                                        class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold">Manual Técnico <small
+                                        class="text-muted">(Opcional)</small></label>
                                 <input type="file" name="manual_tecnico" id="manual_tecnico" class="form-control"
                                     accept=".pdf">
                                 <div class="invalid-feedback">
@@ -475,8 +489,8 @@
 
                             {{-- Manual de Usuario --}}
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Manual de Usuario <span
-                                        class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold">Manual de Usuario <small
+                                        class="text-muted">(Opcional)</small></label>
                                 <input type="file" name="manual_usuario" id="manual_usuario" class="form-control"
                                     accept=".pdf">
                                 <div class="invalid-feedback">
@@ -523,6 +537,12 @@
                                             id="tec_{{ $tecnologia->id }}">
                                         <label class="form-check-label" for="tec_{{ $tecnologia->id }}">
                                             {{ $tecnologia->nombre }}
+                                            @if ($tecnologia->version)
+                                                <span class="badge bg-primary-subtle text-primary ms-1"
+                                                    style="font-size:0.65rem">
+                                                    v{{ $tecnologia->version }}
+                                                </span>
+                                            @endif
                                             <small class="text-muted">({{ $tecnologia->tipo }})</small>
                                         </label>
                                     </div>
@@ -537,6 +557,12 @@
                                             id="tec_{{ $tecnologia->id }}">
                                         <label class="form-check-label" for="tec_{{ $tecnologia->id }}">
                                             {{ $tecnologia->nombre }}
+                                            @if ($tecnologia->version)
+                                                <span class="badge bg-primary-subtle text-primary ms-1"
+                                                    style="font-size:0.65rem">
+                                                    v{{ $tecnologia->version }}
+                                                </span>
+                                            @endif
                                             <small class="text-muted">({{ $tecnologia->tipo }})</small>
                                         </label>
                                     </div>
@@ -643,6 +669,12 @@
                                         <label class="form-check-label" for="bd_{{ $bd->id }}">
                                             {{ $bd->nombre }}
                                             <small class="text-muted">({{ $bd->gestor }})</small>
+                                            @if ($bd->version)
+                                                <span class="badge bg-success-subtle text-success ms-1"
+                                                    style="font-size:0.65rem">
+                                                    v{{ $bd->version }}
+                                                </span>
+                                            @endif
                                         </label>
                                     </div>
                                 </div>
@@ -656,6 +688,12 @@
                                         <label class="form-check-label" for="bd_{{ $bd->id }}">
                                             {{ $bd->nombre }}
                                             <small class="text-muted">({{ $bd->gestor }})</small>
+                                            @if ($bd->version)
+                                                <span class="badge bg-success-subtle text-success ms-1"
+                                                    style="font-size:0.65rem">
+                                                    v{{ $bd->version }}
+                                                </span>
+                                            @endif
                                         </label>
                                     </div>
                                 </div>
@@ -678,9 +716,21 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title mb-0">
-                            <i class="ti ti-key me-1"></i>Credenciales <span class="text-danger">*</span>
+                            <i class="ti ti-key me-1"></i>Credenciales
+                            <small class="text-muted ms-1">(Opcional)</small>
                         </h4>
-                        <span class="selected-count" id="creds-count">0 seleccionadas</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="selected-count" id="creds-count">0 seleccionadas</span>
+                            {{-- ✅ Botón + agregar credencial rápida --}}
+                            @can('admin.credenciales.store')
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#addCredencialRapidaModal"
+                                    title="Agregar nueva credencial para este sistema">
+                                    <i class="ti ti-plus"></i>
+                                </button>
+                            @endcan
+                        </div>
+
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
@@ -758,6 +808,7 @@
     </form>
 
     @include('admin.sistemas.versiones.documentos-adicionales')
+    @include('admin.sistemas.versiones.add-credencial-rapida')
 @endsection
 
 @section('scripts')
@@ -964,8 +1015,8 @@
                     >
                         <option value="">Seleccionar...</option>
                         ${documentosTipos.map(doc => `
-                                                <option value="${doc.id}">${doc.nombre}</option>
-                                            `).join('')}
+                                                                                                                            <option value="${doc.id}">${doc.nombre}</option>
+                                                                                                                        `).join('')}
                     </select>
                     <div class="invalid-feedback">Debe seleccionar un tipo de documento</div>
                 </div>
@@ -1316,6 +1367,21 @@
             document.getElementById('manual_usuario')?.addEventListener('change', function() {
                 validateFileRequired(this, 100, ['pdf'], true);
             });
+            document.getElementById('archivo_bd')?.addEventListener('change', function() {
+                const extensiones = ['sql', 'gz', 'xbk', 'dump', 'backup', 'tar', 'bson', 'json', 'archive',
+                    'bak', 'bz2', 'zip'
+                ];
+                if (this.files[0]) {
+                    const ext = this.files[0].name.split('.').pop().toLowerCase();
+                    if (!extensiones.includes(ext)) {
+                        this.classList.add('is-invalid');
+                        this.value = '';
+                    } else {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    }
+                }
+            });
 
             // ========== VALIDACIÓN DE CHECKBOXES OBLIGATORIOS ==========
             function validateCheckboxGroup(checkboxClass, errorId) {
@@ -1349,10 +1415,6 @@
                 cb.addEventListener('change', () => validateCheckboxGroup('bd-checkbox', 'bd-error'));
             });
 
-            document.querySelectorAll('.cred-checkbox').forEach(cb => {
-                cb.addEventListener('change', () => validateCheckboxGroup('cred-checkbox', 'creds-error'));
-            });
-
             // ========== FUNCIÓN DE VALIDACIÓN COMPLETA ==========
             function validateForm() {
                 let isFormValid = true;
@@ -1383,7 +1445,7 @@
                     isFormValid = false;
                 }
 
-                if (!validateFileRequired(document.getElementById('manual_tecnico'), 100, ['pdf'],
+                /* if (!validateFileRequired(document.getElementById('manual_tecnico'), 100, ['pdf'],
                         true)) {
                     errors.push('Manual técnico');
                     isFormValid = false;
@@ -1393,7 +1455,7 @@
                         true)) {
                     errors.push('Manual de usuario');
                     isFormValid = false;
-                }
+                } */
 
                 if (!validateCheckboxGroup('tecnologia-checkbox', 'tecnologias-error')) {
                     errors.push('Tecnologías');
@@ -1407,11 +1469,6 @@
 
                 if (!validateCheckboxGroup('bd-checkbox', 'bd-error')) {
                     errors.push('Bases de Datos');
-                    isFormValid = false;
-                }
-
-                if (!validateCheckboxGroup('cred-checkbox', 'creds-error')) {
-                    errors.push('Credenciales');
                     isFormValid = false;
                 }
 
@@ -1516,6 +1573,7 @@
                 const codigoFuenteFile = document.getElementById('codigo_fuente').files[0];
                 const manualTecnicoFile = document.getElementById('manual_tecnico').files[0];
                 const manualUsuarioFile = document.getElementById('manual_usuario').files[0];
+                const archivoBdFile = document.getElementById('archivo_bd')?.files[0];
                 const imagenFile = document.getElementById('imagen').files[0];
 
                 const numeroVersion = document.getElementById('numero_version').value;
@@ -1543,41 +1601,52 @@
                                 </div>
                             </div>
 
+                            ${archivoBdFile ? `
+                                        <div class="upload-progress-item">
+                                            <div class="progress-label">
+                                                <div class="file-info">
+                                                    <span><i class="ti ti-database text-warning me-1"></i><strong>Archivo Base de Datos</strong></span>
+                                                    <span class="file-name">${archivoBdFile.name}</span>
+                                                    <span class="file-size">${formatBytes(archivoBdFile.size)}</span>
+                                                </div>
+                                            </div>
+                                            <div class="progress">
+                                                <div id="progress-archivoBd" class="progress-bar bg-warning progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
+                                            </div>
+                                            <div class="progress-status"><span id="status-archivoBd">Esperando...</span></div>
+                                        </div>` : ''}
+
                             <!-- Manual Técnico -->
-                            <div class="upload-progress-item">
-                                <div class="progress-label">
-                                    <div class="file-info">
-                                        <span><i class="ti ti-file-text text-success me-1"></i><strong>Manual Técnico</strong></span>
-                                        <span class="file-name">${manualTecnicoFile.name}</span>
-                                        <span class="file-size">${formatBytes(manualTecnicoFile.size)}</span>
-                                    </div>
-                                </div>
-                                <div class="progress">
-                                    <div id="progress-tecnico" class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
-                                </div>
-                                <div class="progress-status">
-                                    <span id="status-tecnico">Esperando...</span>
-                                    <span id="speed-tecnico"></span>
-                                </div>
-                            </div>
+                            ${manualTecnicoFile ? `
+                                            <div class="upload-progress-item">
+                                                <div class="progress-label">
+                                                    <div class="file-info">
+                                                        <span><i class="ti ti-file-text text-success me-1"></i><strong>Manual Técnico</strong></span>
+                                                        <span class="file-name">${manualTecnicoFile.name}</span>
+                                                        <span class="file-size">${formatBytes(manualTecnicoFile.size)}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="progress">
+                                                    <div id="progress-tecnico" class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
+                                                </div>
+                                                <div class="progress-status"><span id="status-tecnico">Esperando...</span></div>
+                                            </div>` : ''}
 
                             <!-- Manual Usuario -->
-                            <div class="upload-progress-item">
-                                <div class="progress-label">
-                                    <div class="file-info">
-                                        <span><i class="ti ti-file-description text-info me-1"></i><strong>Manual Usuario</strong></span>
-                                        <span class="file-name">${manualUsuarioFile.name}</span>
-                                        <span class="file-size">${formatBytes(manualUsuarioFile.size)}</span>
-                                    </div>
-                                </div>
-                                <div class="progress">
-                                    <div id="progress-usuario" class="progress-bar bg-info progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
-                                </div>
-                                <div class="progress-status">
-                                    <span id="status-usuario">Esperando...</span>
-                                    <span id="speed-usuario"></span>
-                                </div>
-                            </div>
+                            ${manualUsuarioFile ? `
+                                            <div class="upload-progress-item">
+                                                <div class="progress-label">
+                                                    <div class="file-info">
+                                                        <span><i class="ti ti-file-description text-info me-1"></i><strong>Manual Usuario</strong></span>
+                                                        <span class="file-name">${manualUsuarioFile.name}</span>
+                                                        <span class="file-size">${formatBytes(manualUsuarioFile.size)}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="progress">
+                                                    <div id="progress-usuario" class="progress-bar bg-info progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
+                                                </div>
+                                                <div class="progress-status"><span id="status-usuario">Esperando...</span></div>
+                                            </div>` : ''}
                         </div>
                     `,
                     allowOutsideClick: false,
@@ -1615,15 +1684,25 @@
                     initFormData.append('codigo_fuente_tipo', codigoFuenteFile.type ||
                         'application/octet-stream');
 
-                    initFormData.append('manual_tecnico_nombre', manualTecnicoFile.name);
-                    initFormData.append('manual_tecnico_tamano', manualTecnicoFile.size);
-                    initFormData.append('manual_tecnico_tipo', manualTecnicoFile.type ||
-                        'application/octet-stream');
+                    if (manualTecnicoFile) {
+                        initFormData.append('manual_tecnico_nombre', manualTecnicoFile.name);
+                        initFormData.append('manual_tecnico_tamano', manualTecnicoFile.size);
+                        initFormData.append('manual_tecnico_tipo', manualTecnicoFile.type ||
+                            'application/octet-stream');
+                    }
+                    if (manualUsuarioFile) {
+                        initFormData.append('manual_usuario_nombre', manualUsuarioFile.name);
+                        initFormData.append('manual_usuario_tamano', manualUsuarioFile.size);
+                        initFormData.append('manual_usuario_tipo', manualUsuarioFile.type ||
+                            'application/octet-stream');
+                    }
 
-                    initFormData.append('manual_usuario_nombre', manualUsuarioFile.name);
-                    initFormData.append('manual_usuario_tamano', manualUsuarioFile.size);
-                    initFormData.append('manual_usuario_tipo', manualUsuarioFile.type ||
-                        'application/octet-stream');
+                    if (archivoBdFile) {
+                        initFormData.append('archivo_bd_nombre', archivoBdFile.name);
+                        initFormData.append('archivo_bd_tamano', archivoBdFile.size);
+                        initFormData.append('archivo_bd_tipo', archivoBdFile.type ||
+                            'application/octet-stream');
+                    }
 
                     // Imagen (pequeña, se sube directo)
                     if (imagenFile) {
@@ -1734,9 +1813,8 @@
                         }
                     };
 
-                    // PASO 3: Subir los 3 archivos en paralelo
-                    const [codigoIdentifier, tecnicoIdentifier, usuarioIdentifier] = await Promise.all([
-                        // Código fuente (chunks de 5MB)
+                    // PASO 3: Subir archivos en paralelo (manuales opcionales)
+                    const uploadPromises = [
                         uploadFileInChunks(
                             codigoFuenteFile,
                             uploadId,
@@ -1744,26 +1822,49 @@
                             CHUNK_SIZE_CODIGO,
                             (data) => updateProgress('codigo', data.progress, data.chunkIndex,
                                 data.totalChunks, data.bytesUploaded, data.totalBytes)
-                        ),
-                        // Manual técnico (chunks de 2MB)
-                        uploadFileInChunks(
+                        )
+                    ];
+
+                    if (manualTecnicoFile) {
+                        uploadPromises.push(uploadFileInChunks(
                             manualTecnicoFile,
                             uploadId,
                             'manual_tecnico',
                             CHUNK_SIZE_MANUAL,
                             (data) => updateProgress('tecnico', data.progress, data.chunkIndex,
                                 data.totalChunks, data.bytesUploaded, data.totalBytes)
-                        ),
-                        // Manual usuario (chunks de 2MB)
-                        uploadFileInChunks(
+                        ));
+                    }
+
+                    if (manualUsuarioFile) {
+                        uploadPromises.push(uploadFileInChunks(
                             manualUsuarioFile,
                             uploadId,
                             'manual_usuario',
                             CHUNK_SIZE_MANUAL,
                             (data) => updateProgress('usuario', data.progress, data.chunkIndex,
                                 data.totalChunks, data.bytesUploaded, data.totalBytes)
-                        )
-                    ]);
+                        ));
+                    }
+
+                    if (archivoBdFile) {
+                        uploadPromises.push(uploadFileInChunks(
+                            archivoBdFile,
+                            uploadId,
+                            'archivo_bd',
+                            CHUNK_SIZE_MANUAL, // 2MB por chunk
+                            (data) => updateProgress('archivoBd', data.progress, data
+                                .chunkIndex,
+                                data.totalChunks, data.bytesUploaded, data.totalBytes)
+                        ));
+                    }
+
+                    const results = await Promise.all(uploadPromises);
+                    const codigoIdentifier = results[0];
+                    let idx = 1;
+                    const tecnicoIdentifier = manualTecnicoFile ? results[idx++] : null;
+                    const usuarioIdentifier = manualUsuarioFile ? results[idx++] : null;
+                    const archivoBdIdentifier = archivoBdFile ? results[idx++] : null;
 
                     console.log('✅ Todos los archivos subidos');
                     console.log('  - Código:', codigoIdentifier);
@@ -1778,7 +1879,8 @@
                                 upload_id: uploadId,
                                 codigo_identifier: codigoIdentifier,
                                 manual_tecnico_identifier: tecnicoIdentifier,
-                                manual_usuario_identifier: usuarioIdentifier
+                                manual_usuario_identifier: usuarioIdentifier,
+                                archivo_bd_identifier: archivoBdIdentifier,
                             }),
                             headers: {
                                 'X-CSRF-TOKEN': csrf,

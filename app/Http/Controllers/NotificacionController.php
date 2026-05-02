@@ -8,12 +8,17 @@ use Illuminate\Http\Request;
 
 class NotificacionController extends Controller
 {
-    protected $telegramService;
-
     public function __construct(TelegramService $telegramService)
     {
         $this->telegramService = $telegramService;
+
+        $this->middleware('can:admin.notificaciones.index')->only('index');
+        $this->middleware('can:admin.notificaciones.show')->only('show');
+        $this->middleware('can:admin.notificaciones.update')->only(['marcarEnviada', 'reenviar', 'limpiar']);
+        $this->middleware('can:admin.notificaciones.destroy')->only('destroy');
     }
+
+    protected $telegramService;
 
     public function index()
     {
@@ -31,7 +36,7 @@ class NotificacionController extends Controller
         ];
 
         return view('admin.notificaciones.index', compact('notificaciones', 'estadisticas'));
-    }    
+    }
 
     public function show(Notificacion $notificacion)
     {

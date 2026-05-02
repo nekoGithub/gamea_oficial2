@@ -2,13 +2,12 @@
 
 @section('css')
     <style>
-        /* Contenedor de la imagen con Ken Burns */
+        /* ── Ken Burns ── */
         .card-side-img {
             position: relative !important;
             overflow: hidden !important;
         }
 
-        /* Imagen con efecto Ken Burns */
         #kenburns-bg {
             position: absolute !important;
             top: 0 !important;
@@ -43,7 +42,7 @@
             }
         }
 
-        /* Overlay transparente */
+        /* ── Overlay ── */
         .gamea-overlay {
             position: absolute !important;
             top: 0 !important;
@@ -53,28 +52,27 @@
             z-index: 1 !important;
         }
 
-        /* Contenedor del título typewriter */
+        /* ── Typewriter ── */
         .welcome-title {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #26C6DA;
+            color: #007B8A !important;
+            /* WCAG AA: ratio ~4.98:1 ✓ */
             line-height: 1.6;
             text-align: center;
             margin: 0 auto 1.5rem;
             min-height: 90px;
         }
 
-        /* Líneas del typewriter */
         .typewriter-line {
             display: block;
             min-height: 1.6em;
             white-space: nowrap;
         }
 
-        /* Cursor inline que se mueve con el texto */
         .cursor {
             display: inline;
-            border-right: 3px solid #26C6DA;
+            border-right: 3px solid #007B8A;
             animation: blink 0.7s infinite;
             margin-left: 2px;
         }
@@ -83,7 +81,7 @@
 
             0%,
             50% {
-                border-color: #26C6DA;
+                border-color: #007B8A;
             }
 
             51%,
@@ -92,14 +90,15 @@
             }
         }
 
-        /* Subtítulo más grande */
+        /* ── Subtítulo ── */
         .auth-subtitle {
             font-size: 15px;
             line-height: 1.6;
-            color: #6c757d;
+            color: #595959 !important;
+            /* WCAG AA: ratio ~7:1 ✓ */
         }
 
-        /* Labels más grandes y con mejor peso */
+        /* ── Labels ── */
         .form-label {
             font-size: 15px !important;
             font-weight: 600 !important;
@@ -107,7 +106,13 @@
             margin-bottom: 10px !important;
         }
 
-        /* Inputs más grandes */
+        .required-mark {
+            color: #C0392B !important;
+            /* ratio 5.1:1 ✓ */
+            font-weight: 700;
+        }
+
+        /* ── Inputs ── */
         .form-control-lg {
             font-size: 16px !important;
             padding: 14px 16px !important;
@@ -116,15 +121,24 @@
         }
 
         .form-control::placeholder {
-            color: #adb5bd !important;
+            color: #767676 !important;
+            /* WCAG AA: ratio ~4.54:1 ✓ */
             opacity: 1 !important;
             font-size: 15px !important;
         }
 
-        /* Checkbox y texto más grande */
+        .form-control:focus {
+            border-color: #007B8A !important;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 138, 0.25) !important;
+            transition: all 0.3s ease;
+        }
+
+        /* ── Checkbox ── */
         .form-check-label {
             font-size: 15px !important;
             margin-left: 4px;
+            color: #595959 !important;
+            /* WCAG AA: ratio ~7:1 ✓ */
         }
 
         .form-check-input {
@@ -133,18 +147,28 @@
             margin-top: 2px !important;
         }
 
-        /* Enlaces más grandes */
+        .form-check-input:checked {
+            background-color: #007B8A !important;
+            border-color: #007B8A !important;
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 138, 0.25) !important;
+        }
+
+        /* ── Enlaces ── */
         a {
-            color: #26C6DA !important;
+            color: #007B8A !important;
+            /* WCAG AA ✓ */
             transition: color 0.3s ease;
             font-size: 15px !important;
         }
 
         a:hover {
-            color: #00ACC1 !important;
+            color: #005F6B !important;
         }
 
-        /* Botón más grande y destacado */
+        /* ── Botón ── */
         .btn-primary {
             background-color: #D32F2F !important;
             border-color: #D32F2F !important;
@@ -161,36 +185,24 @@
             box-shadow: 0 6px 20px rgba(211, 47, 47, 0.4);
         }
 
-        /* Focus states mejorados */
-        .form-control:focus {
-            border-color: #26C6DA !important;
-            box-shadow: 0 0 0 0.25rem rgba(38, 198, 218, 0.25) !important;
-            transition: all 0.3s ease;
-        }
-
-        .form-check-input:checked {
-            background-color: #26C6DA !important;
-            border-color: #26C6DA !important;
-        }
-
-        .form-check-input:focus {
-            box-shadow: 0 0 0 0.25rem rgba(38, 198, 218, 0.25) !important;
-        }
-
-        /* Footer más legible */
+        /* ── Footer ── */
         .auth-footer {
             font-size: 14px;
         }
 
-        .auth-footer small {
+        .auth-footer small,
+        .auth-footer small span {
             font-size: 13px;
+            color: #595959 !important;
+            /* WCAG AA: ratio ~7:1 ✓ */
         }
 
-        /* Espaciado mejorado */
+        /* ── Espaciado ── */
         .mb-custom {
             margin-bottom: 1.5rem !important;
         }
 
+        /* ── Responsive ── */
         @media (max-width: 768px) {
             .card-side-img {
                 min-height: 300px;
@@ -236,7 +248,7 @@
                                 <span class="typewriter-line" id="line2"></span>
                             </div>
 
-                            <p class="text-muted text-center mb-4 auth-subtitle">
+                            <p class="text-center mb-4 auth-subtitle">
                                 Sistema de Gestión de Activos Tecnológicos<br>
                                 Ingrese sus credenciales para continuar
                             </p>
@@ -252,7 +264,7 @@
 
                                 <div class="mb-custom">
                                     <label class="form-label" for="email">
-                                        Correo Electrónico <span class="text-danger">*</span>
+                                        Correo Electrónico <span class="required-mark">*</span>
                                     </label>
                                     <input class="form-control form-control-lg" id="email" name="email" type="email"
                                         placeholder="usuario@ejemplo.com" value="{{ old('email') }}" required autofocus />
@@ -260,24 +272,15 @@
 
                                 <div class="mb-custom">
                                     <label class="form-label" for="password">
-                                        Contraseña <span class="text-danger">*</span>
+                                        Contraseña <span class="required-mark">*</span>
                                     </label>
                                     <input class="form-control form-control-lg" id="password" name="password"
                                         type="password" placeholder="••••••••" required />
                                 </div>
 
                                 <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" id="remember" name="remember" type="checkbox" />
-                                        <label class="form-check-label" for="remember">
-                                            Recordarme
-                                        </label>
-                                    </div>
-                                    @if (Route::has('password.request'))
-                                        <a href="{{ route('password.request') }}" class="fw-medium">
-                                            ¿Olvidó su contraseña?
-                                        </a>
-                                    @endif
+                                    
+
                                 </div>
 
                                 <div class="d-grid mb-3">
@@ -289,12 +292,6 @@
                         </div>
 
                         <div class="mt-auto pt-5 auth-footer">
-                            @if (Route::has('register'))
-                                <p class="text-center text-muted mb-3">
-                                    ¿No tiene cuenta?
-                                    <a href="{{ route('register') }}" class="fw-semibold">Crear una cuenta</a>
-                                </p>
-                            @endif
                             <p class="text-center text-muted mb-0">
                                 <small>
                                     © {{ date('Y') }} GAMEA - Gobierno Autónomo Municipal de El Alto<br>

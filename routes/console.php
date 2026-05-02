@@ -46,3 +46,13 @@ Schedule::command('integridad:verificar --tipo=ssl --telegram')
     ->cron('0 */12 * * *') // cada 12 horas
     ->timezone('America/La_Paz')
     ->appendOutputTo(storage_path('logs/integridad-ssl.log'));
+
+// Resumen de servidores 6:00 AM 
+Schedule::command('servidores:resumen --hora="06:00 AM"')
+    ->dailyAt('10:00')
+    ->timezone('America/La_Paz');
+
+// Resumen de servidores 12:00 PM 
+Schedule::command('servidores:resumen --hora="12:00 PM"')
+    ->dailyAt('16:00')
+    ->timezone('America/La_Paz');

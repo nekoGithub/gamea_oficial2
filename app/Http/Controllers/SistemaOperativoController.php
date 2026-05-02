@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 
 class SistemaOperativoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.sistemas-operativos.index')->only('index');
+        $this->middleware('can:admin.sistemas-operativos.store')->only('store');
+        $this->middleware('can:admin.sistemas-operativos.edit')->only('edit');
+        $this->middleware('can:admin.sistemas-operativos.update')->only('update');
+        $this->middleware('can:admin.sistemas-operativos.destroy')->only('destroy');
+        $this->middleware('can:admin.sistemas-operativos.restore')->only('restore');
+    }
+    
     public function index()
     {
         $sistemasOperativos = SistemaOperativo::orderBy('id', 'desc')->get();
@@ -26,15 +36,15 @@ class SistemaOperativoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'version' => 'required|string|max:50',
+            'nombre' => 'required|string|max:45',
+            'version' => 'required|string|max:15',
             'descripcion' => 'nullable|string|max:1000',
             'estado' => 'required|in:activo,inactivo',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 100 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 45 caracteres.',
             'version.required' => 'La versión es obligatoria.',
-            'version.max' => 'La versión no puede exceder 50 caracteres.',
+            'version.max' => 'La versión no puede exceder 15 caracteres.',
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres.',
             'estado.required' => 'El estado es obligatorio.',
             'estado.in' => 'El estado debe ser activo o inactivo.',
@@ -64,15 +74,15 @@ class SistemaOperativoController extends Controller
     public function update(Request $request, SistemaOperativo $sistemasOperativo)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'version' => 'required|string|max:50',
+            'nombre' => 'required|string|max:45',
+            'version' => 'required|string|max:15',
             'descripcion' => 'nullable|string|max:1000',
             'estado' => 'required|in:activo,inactivo',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 100 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 45 caracteres.',
             'version.required' => 'La versión es obligatoria.',
-            'version.max' => 'La versión no puede exceder 50 caracteres.',
+            'version.max' => 'La versión no puede exceder 15 caracteres.',
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres.',
             'estado.required' => 'El estado es obligatorio.',
             'estado.in' => 'El estado debe ser activo o inactivo.',

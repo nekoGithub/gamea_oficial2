@@ -99,9 +99,11 @@
             <div class="card">
                 <div class="card-header border-light d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Listado de Notificaciones</h4>
-                    <button class="btn btn-danger btn-sm" id="limpiarBtn">
-                        <i class="ti ti-trash me-1"></i> Limpiar Antiguas
-                    </button>
+                    @can('admin.notificaciones.update')
+                        <button class="btn btn-danger btn-sm" id="limpiarBtn">
+                            <i class="ti ti-trash me-1"></i> Limpiar Antiguas
+                        </button>
+                    @endcan
                 </div>
 
                 <div class="card-body">
@@ -200,22 +202,28 @@
                                         <td>{!! $notif->estado_badge !!}</td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-1">
-                                                @if ($notif->estado !== 'enviado')
-                                                    <button
-                                                        class="btn btn-success btn-icon btn-sm rounded-circle reenviar-btn"
-                                                        data-id="{{ $notif->id }}" title="Reenviar">
-                                                        <i class="ti ti-send fs-lg"></i>
+                                                @can('admin.notificaciones.update')
+                                                    @if ($notif->estado !== 'enviado')
+                                                        <button
+                                                            class="btn btn-success btn-icon btn-sm rounded-circle reenviar-btn"
+                                                            data-id="{{ $notif->id }}" title="Reenviar">
+                                                            <i class="ti ti-send fs-lg"></i>
+                                                        </button>
+                                                    @endif
+                                                @endcan
+                                                @can('admin.notificaciones.show')
+                                                    <button class="btn btn-default btn-icon btn-sm rounded-circle ver-btn"
+                                                        data-id="{{ $notif->id }}" data-mensaje="{{ $notif->mensaje }}"
+                                                        title="Ver completo">
+                                                        <i class="ti ti-eye fs-lg"></i>
                                                     </button>
-                                                @endif
-                                                <button class="btn btn-default btn-icon btn-sm rounded-circle ver-btn"
-                                                    data-id="{{ $notif->id }}" data-mensaje="{{ $notif->mensaje }}"
-                                                    title="Ver completo">
-                                                    <i class="ti ti-eye fs-lg"></i>
-                                                </button>
-                                                <button class="btn btn-default btn-icon btn-sm rounded-circle delete-btn"
-                                                    data-id="{{ $notif->id }}" title="Eliminar">
-                                                    <i class="ti ti-trash fs-lg"></i>
-                                                </button>
+                                                @endcan
+                                                @can('admin.notificaciones.destroy')
+                                                    <button class="btn btn-default btn-icon btn-sm rounded-circle delete-btn"
+                                                        data-id="{{ $notif->id }}" title="Eliminar">
+                                                        <i class="ti ti-trash fs-lg"></i>
+                                                    </button>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>

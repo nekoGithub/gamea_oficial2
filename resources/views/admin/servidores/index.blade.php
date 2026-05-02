@@ -33,10 +33,12 @@
 
                         <div class="card-header border-light justify-content-between">
                             <h4 class="card-title mb-0">Servidores</h4>
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServidorModal"
-                                href="#">
-                                <i class="ti ti-plus me-1"></i> Agregar Servidor
-                            </a>
+                            @can('admin.servidores.store')
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServidorModal"
+                                    href="#">
+                                    <i class="ti ti-plus me-1"></i> Agregar Servidor
+                                </a>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -143,7 +145,16 @@
                                         @forelse ($servidores as $servidor)
                                             <tr data-id="{{ $servidor->id }}">
                                                 <td>{{ $servidor->id }}</td>
-                                                <td>{{ $servidor->nombre }}</td>
+                                                <td>
+                                                    <strong>{{ $servidor->nombre }}</strong>
+
+                                                    @if ($servidor->descripcion)
+                                                        <div class="text-muted small mt-1" data-bs-toggle="tooltip"
+                                                            title="{{ $servidor->descripcion }}">
+                                                            {{ Str::limit($servidor->descripcion, 60) }}
+                                                        </div>
+                                                    @endif
+                                                </td>
                                                 <td><code>{{ $servidor->ip_interna }}</code></td>
                                                 <td>
                                                     @if ($servidor->ip_externa)
@@ -180,16 +191,20 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle edit-servidor-btn"
-                                                            data-id="{{ $servidor->id }}">
-                                                            <i class="ti ti-edit fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle delete-servidor-btn"
-                                                            data-id="{{ $servidor->id }}">
-                                                            <i class="ti ti-trash fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.servidores.edit')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle edit-servidor-btn"
+                                                                data-id="{{ $servidor->id }}">
+                                                                <i class="ti ti-edit fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.servidores.destroy')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle delete-servidor-btn"
+                                                                data-id="{{ $servidor->id }}">
+                                                                <i class="ti ti-trash fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -295,11 +310,13 @@
                                                 <td>{{ $servidor->deleted_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle restore-servidor-btn"
-                                                            data-id="{{ $servidor->id }}">
-                                                            <i class="ti ti-rotate fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.servidores.restore')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle restore-servidor-btn"
+                                                                data-id="{{ $servidor->id }}">
+                                                                <i class="ti ti-rotate fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -327,6 +344,10 @@
     @vite(['resources/js/datatables/datatables-servidores.js'])
 
     <script>
+        // Permisos 
+        const canEdit = @json(auth()->user()?->can('admin.servidores.edit') ?? false);
+        const canDestroy = @json(auth()->user()?->can('admin.servidores.destroy') ?? false);
+        const canRestore = @json(auth()->user()?->can('admin.servidores.restore') ?? false);
         /* ==================== FUNCIONES DE UTILIDAD ==================== */
 
         function getSistemaOperativoBadge(so) {
@@ -354,24 +375,21 @@
         }
 
         function accionesActivos(id) {
-            return `
-                <div class="d-flex justify-content-center gap-1">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-servidor-btn" data-id="${id}">
-                        <i class="ti ti-edit fs-lg"></i>
-                    </a>
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-servidor-btn" data-id="${id}">
-                        <i class="ti ti-trash fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (canEdit) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-servidor-btn" data-id="${id}"><i class="ti ti-edit fs-lg"></i></a>`;
+            if (canDestroy) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-servidor-btn" data-id="${id}"><i class="ti ti-trash fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         function accionesPapelera(id) {
-            return `
-                <div class="d-flex justify-content-center">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-servidor-btn" data-id="${id}">
-                        <i class="ti ti-rotate fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center">';
+            if (canRestore) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-servidor-btn" data-id="${id}"><i class="ti ti-rotate fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         /* ==================== LÓGICA PRINCIPAL ==================== */
@@ -438,7 +456,13 @@
 
                     window.servidoresDataTables.activos.row.add([
                         data.servidor.id,
-                        data.servidor.nombre,
+                        `<div>
+                            <strong>${data.servidor.nombre}</strong>
+                            ${data.servidor.descripcion 
+                                ? `<div class="text-muted small mt-1">${data.servidor.descripcion.substring(0,60)}</div>` 
+                                : ''
+                            }
+                        </div>`,
                         `<code>${data.servidor.ip_interna}</code>`,
                         data.servidor.ip_externa ?
                         `<code class="text-success">${data.servidor.ip_externa}</code>` :
@@ -536,7 +560,13 @@
 
                     window.servidoresDataTables.activos.row(`#servidor-${id}`).data([
                         data.servidor.id,
-                        data.servidor.nombre,
+                        `<div>
+                            <strong>${data.servidor.nombre}</strong>
+                            ${data.servidor.descripcion 
+                                ? `<div class="text-muted small mt-1">${data.servidor.descripcion.substring(0,60)}</div>` 
+                                : ''
+                            }
+                        </div>`,
                         `<code>${data.servidor.ip_interna}</code>`,
                         data.servidor.ip_externa ?
                         `<code class="text-success">${data.servidor.ip_externa}</code>` :
@@ -585,8 +615,12 @@
                         document.getElementById('editIpExterna').value = data.servidor.ip_externa || '';
                         document.getElementById('editMacAddress').value = data.servidor.mac_address ||
                             '';
+
                         document.getElementById('editSistemaOperativoId').value = data.servidor
                             .sistema_operativo_id;
+
+                        document.getElementById('editDescripcion').value = data.servidor.descripcion ??
+                            '';
 
                         // Tipo servidor
                         if (data.servidor.tipo_servidor === 'físico') {
@@ -757,7 +791,13 @@
 
                         dtA.row.add([
                             data.servidor.id,
-                            data.servidor.nombre,
+                            `<div>
+                                <strong>${data.servidor.nombre}</strong>
+                                ${data.servidor.descripcion 
+                                    ? `<div class="text-muted small mt-1">${data.servidor.descripcion.substring(0,60)}</div>` 
+                                    : ''
+                                }
+                            </div>`,
                             `<code>${data.servidor.ip_interna}</code>`,
                             data.servidor.ip_externa ?
                             `<code class="text-success">${data.servidor.ip_externa}</code>` :

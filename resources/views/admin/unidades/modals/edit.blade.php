@@ -44,10 +44,11 @@
                             <div class="invalid-feedback">La sigla es obligatoria.</div>
                         </div>
 
-                        <!-- Celular -->
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Celular</label>
-                            <input type="text" class="form-control" id="editCelular" name="celular">
+                        <div class="col-md-3"> {{-- o el col que uses --}}
+                            <label class="form-label fw-semibold">Teléfono</label>
+                            <input type="text" class="form-control" id="editCelular" name="celular"
+                                placeholder="Ej. 75123456" maxlength="8" inputmode="numeric">
+                            <div class="invalid-feedback">El teléfono debe tener 8 dígitos numéricos.</div>
                         </div>
 
                         <!-- Descripción -->
@@ -63,12 +64,14 @@
                             </label>
 
                             <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="estado" id="editEstadoActiva" value="activa">
+                                <input type="radio" class="btn-check" name="estado" id="editEstadoActiva"
+                                    value="activa">
                                 <label class="btn btn-outline-success" for="editEstadoActiva">
                                     <i class="ti ti-check me-1"></i> Activa
                                 </label>
 
-                                <input type="radio" class="btn-check" name="estado" id="editEstadoInactiva" value="inactiva">
+                                <input type="radio" class="btn-check" name="estado" id="editEstadoInactiva"
+                                    value="inactiva">
                                 <label class="btn btn-outline-secondary" for="editEstadoInactiva">
                                     <i class="ti ti-ban me-1"></i> Inactiva
                                 </label>
@@ -95,12 +98,9 @@
                             </select>
 
                             <small class="text-muted">
-                                Debe seleccionar al menos un responsable.
+                                El campo responsable es opcional.
                             </small>
-
-                            <div id="edit-responsables-error" class="invalid-feedback d-block d-none">
-                                Debe seleccionar al menos un responsable.
-                            </div>
+                            
                         </div>
 
                     </div>

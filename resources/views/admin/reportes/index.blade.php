@@ -79,7 +79,8 @@
                             </div>
                             <div class="row mt-3">
                                 <div class="col-12">
-                                    <small class="text-success">✓ {{ $estadisticas['servidores_activos'] }} Operativos</small>
+                                    <small class="text-success">✓ {{ $estadisticas['servidores_activos'] }}
+                                        Operativos</small>
                                 </div>
                             </div>
                         </div>
@@ -92,7 +93,8 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
-                                    <h4 class="fw-semibold mb-1">{{ number_format($estadisticas['total_credenciales']) }}</h4>
+                                    <h4 class="fw-semibold mb-1">{{ number_format($estadisticas['total_credenciales']) }}
+                                    </h4>
                                     <p class="mb-0 text-muted">Credenciales</p>
                                 </div>
                                 <div class="ms-auto">
@@ -103,7 +105,8 @@
                             </div>
                             <div class="row mt-3">
                                 <div class="col-12">
-                                    <small class="text-success">✓ {{ $estadisticas['credenciales_activas'] }} Activas</small>
+                                    <small class="text-success">✓ {{ $estadisticas['credenciales_activas'] }}
+                                        Activas</small>
                                 </div>
                             </div>
                         </div>
@@ -128,12 +131,15 @@
                                 <div class="flex-grow-1">
                                     <h5 class="card-title mb-2">Inventario de Sistemas</h5>
                                     <p class="card-text text-muted mb-3">
-                                        Listado completo de todos los sistemas, incluyendo estado, servidor, tecnología, y más detalles técnicos.
+                                        Listado completo de todos los sistemas, incluyendo estado, servidor, tecnología, y
+                                        más detalles técnicos.
                                     </p>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.reportes.sistemas') }}" class="btn btn-primary btn-sm">
-                                            <i class="ti ti-eye me-1"></i> Ver Reporte
-                                        </a>
+                                        @can('admin.reportes.index')
+                                            <a href="{{ route('admin.reportes.sistemas') }}" class="btn btn-primary btn-sm">
+                                                <i class="ti ti-eye me-1"></i> Ver Reporte
+                                            </a>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -152,12 +158,15 @@
                                 <div class="flex-grow-1">
                                     <h5 class="card-title mb-2">Certificados SSL</h5>
                                     <p class="card-text text-muted mb-3">
-                                        Control de certificados SSL, fechas de vencimiento, y alertas de seguridad para evitar caídas de servicios.
+                                        Control de certificados SSL, fechas de vencimiento, y alertas de seguridad para
+                                        evitar caídas de servicios.
                                     </p>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.reportes.ssl') }}" class="btn btn-info btn-sm">
-                                            <i class="ti ti-eye me-1"></i> Ver Reporte
-                                        </a>
+                                        @can('admin.reportes.index')
+                                            <a href="{{ route('admin.reportes.ssl') }}" class="btn btn-info btn-sm">
+                                                <i class="ti ti-eye me-1"></i> Ver Reporte
+                                            </a>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -176,12 +185,15 @@
                                 <div class="flex-grow-1">
                                     <h5 class="card-title mb-2">Inventario de Servidores</h5>
                                     <p class="card-text text-muted mb-3">
-                                        Detalle de toda la infraestructura de servidores, sistemas alojados, recursos y estado operativo.
+                                        Detalle de toda la infraestructura de servidores, sistemas alojados, recursos y
+                                        estado operativo.
                                     </p>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.reportes.servidores') }}" class="btn btn-success btn-sm">
-                                            <i class="ti ti-eye me-1"></i> Ver Reporte
-                                        </a>
+                                        @can('admin.reportes.index')
+                                            <a href="{{ route('admin.reportes.servidores') }}" class="btn btn-success btn-sm">
+                                                <i class="ti ti-eye me-1"></i> Ver Reporte
+                                            </a>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -204,9 +216,12 @@
                                         Reporte de credenciales por sistema con información de seguridad protegida.
                                     </p>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.reportes.credenciales') }}" class="btn btn-warning btn-sm">
-                                            <i class="ti ti-eye me-1"></i> Ver Reporte
-                                        </a>
+                                        @can('admin.credenciales.index')
+                                            <a href="{{ route('admin.reportes.credenciales') }}"
+                                                class="btn btn-warning btn-sm">
+                                                <i class="ti ti-eye me-1"></i> Ver Reporte
+                                            </a>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -225,12 +240,15 @@
                                 <div class="flex-grow-1">
                                     <h5 class="card-title mb-2">Registro de Auditorías</h5>
                                     <p class="card-text text-muted mb-3">
-                                        Historial completo de actividades del sistema, accesos de usuarios y cambios realizados.
+                                        Historial completo de actividades del sistema, accesos de usuarios y cambios
+                                        realizados.
                                     </p>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.auditorias.index') }}" class="btn btn-secondary btn-sm">
-                                            <i class="ti ti-eye me-1"></i> Ver Reporte
-                                        </a>
+                                        @can('admin.auditorias.index')
+                                            <a href="{{ route('admin.auditorias.index') }}" class="btn btn-secondary btn-sm">
+                                                <i class="ti ti-eye me-1"></i> Ver Reporte
+                                            </a>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -248,13 +266,15 @@
                             <div class="row text-center">
                                 <div class="col-md-4">
                                     <div class="border-end">
-                                        <h3 class="fw-semibold text-primary">{{ number_format($estadisticas['actividad_hoy']) }}</h3>
+                                        <h3 class="fw-semibold text-primary">
+                                            {{ number_format($estadisticas['actividad_hoy']) }}</h3>
                                         <p class="mb-0 text-muted">Actividades Hoy</p>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="border-end">
-                                        <h3 class="fw-semibold text-info">{{ number_format($estadisticas['actividad_semana']) }}</h3>
+                                        <h3 class="fw-semibold text-info">
+                                            {{ number_format($estadisticas['actividad_semana']) }}</h3>
                                         <p class="mb-0 text-muted">Esta Semana</p>
                                     </div>
                                 </div>
@@ -272,13 +292,13 @@
     </div>
 
     <style>
-    .hover-shadow {
-        transition: all 0.3s ease;
-    }
+        .hover-shadow {
+            transition: all 0.3s ease;
+        }
 
-    .hover-shadow:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
+        .hover-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
     </style>
 @endsection

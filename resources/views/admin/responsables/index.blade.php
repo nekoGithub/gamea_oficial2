@@ -33,10 +33,12 @@
 
                         <div class="card-header border-light justify-content-between">
                             <h4 class="card-title mb-0">Responsables Activos</h4>
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResponsableModal"
-                                href="#">
-                                <i class="ti ti-plus me-1"></i> Agregar Responsable
-                            </a>
+                            @can('admin.responsables.store')
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResponsableModal"
+                                    href="#">
+                                    <i class="ti ti-plus me-1"></i> Agregar Responsable
+                                </a>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -48,6 +50,7 @@
                                             <th>Nombre</th>
                                             <th>Cargo</th>
                                             <th>Email</th>
+                                            <th>Celular</th>
                                             <th>Fecha creación</th>
                                             <th class="text-center">Acciones</th>
                                         </tr>
@@ -94,6 +97,15 @@
                                                         <i class="ti ti-search"></i>
                                                     </span>
                                                     <input class="form-control form-control-sm bg-light-subtle border-light"
+                                                        placeholder="Celular" type="text" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light-subtle border-light">
+                                                        <i class="ti ti-search"></i>
+                                                    </span>
+                                                    <input class="form-control form-control-sm bg-light-subtle border-light"
                                                         placeholder="Fecha" type="text" />
                                                 </div>
                                             </th>
@@ -107,20 +119,25 @@
                                                 <td>{{ $responsable->id }}</td>
                                                 <td>{{ $responsable->nombre }}</td>
                                                 <td>{{ $responsable->cargo }}</td>
-                                                <td>{{ $responsable->email }}</td>
+                                                <td>{{ $responsable->email ? $responsable->email : 'no existe un correo' }}</td>
+                                                <td>{{ $responsable->celular }}</td>
                                                 <td>{{ $responsable->created_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle edit-responsable-btn"
-                                                            data-id="{{ $responsable->id }}">
-                                                            <i class="ti ti-edit fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle delete-responsable-btn"
-                                                            data-id="{{ $responsable->id }}">
-                                                            <i class="ti ti-trash fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.responsables.edit')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle edit-responsable-btn"
+                                                                data-id="{{ $responsable->id }}">
+                                                                <i class="ti ti-edit fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.responsables.destroy')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle delete-responsable-btn"
+                                                                data-id="{{ $responsable->id }}">
+                                                                <i class="ti ti-trash fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -170,7 +187,8 @@
                                                     <span class="input-group-text bg-light-subtle border-light">
                                                         <i class="ti ti-search"></i>
                                                     </span>
-                                                    <input class="form-control form-control-sm bg-light-subtle border-light"
+                                                    <input
+                                                        class="form-control form-control-sm bg-light-subtle border-light"
                                                         placeholder="Nombre" type="text" />
                                                 </div>
                                             </th>
@@ -203,7 +221,7 @@
                                                         class="form-control form-control-sm bg-light-subtle border-light"
                                                         placeholder="Fecha" type="text" />
                                                 </div>
-                                            </th>                                            
+                                            </th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -218,11 +236,13 @@
                                                 <td>{{ $responsable->deleted_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle restore-responsable-btn"
-                                                            data-id="{{ $responsable->id }}">
-                                                            <i class="ti ti-rotate fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.responsables.restore')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle restore-responsable-btn"
+                                                                data-id="{{ $responsable->id }}">
+                                                                <i class="ti ti-rotate fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -250,6 +270,12 @@
     @vite(['resources/js/datatables/datatables-responsables.js'])
 
     <script>
+        const canEdit = @json(auth()->user()?->can('admin.responsables.edit') ?? false);
+        const canDestroy = @json(auth()->user()?->can('admin.responsables.destroy') ?? false);
+        const canRestore = @json(auth()->user()?->can('admin.responsables.restore') ?? false);
+    </script>
+
+    <script>
         /* ==================== FUNCIONES DE UTILIDAD ==================== */
 
         function formatearFecha(fecha) {
@@ -260,24 +286,21 @@
         }
 
         function accionesActivos(id) {
-            return `
-                <div class="d-flex justify-content-center gap-1">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-responsable-btn" data-id="${id}">
-                        <i class="ti ti-edit fs-lg"></i>
-                    </a>
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-responsable-btn" data-id="${id}">
-                        <i class="ti ti-trash fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (canEdit) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-responsable-btn" data-id="${id}"><i class="ti ti-edit fs-lg"></i></a>`;
+            if (canDestroy) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-responsable-btn" data-id="${id}"><i class="ti ti-trash fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         function accionesPapelera(id) {
-            return `
-                <div class="d-flex justify-content-center">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-responsable-btn" data-id="${id}">
-                        <i class="ti ti-rotate fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center">';
+            if (canRestore) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-responsable-btn" data-id="${id}"><i class="ti ti-rotate fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         /* ==================== LÓGICA PRINCIPAL ==================== */
@@ -333,6 +356,7 @@
                         data.responsable.nombre,
                         data.responsable.cargo,
                         data.responsable.email,
+                        data.responsable.celular,
                         formatearFecha(data.responsable.created_at),
                         accionesActivos(data.responsable.id)
                     ]).draw(false);
@@ -403,6 +427,7 @@
                         data.responsable.nombre,
                         data.responsable.cargo,
                         data.responsable.email,
+                        data.responsable.celular,
                         formatearFecha(data.responsable.created_at),
                         accionesActivos(data.responsable.id)
                     ]).draw(false);
@@ -440,6 +465,7 @@
                         document.getElementById('editNombre').value = data.responsable.nombre;
                         document.getElementById('editCargo').value = data.responsable.cargo;
                         document.getElementById('editEmail').value = data.responsable.email;
+                        document.getElementById('editCelular').value = data.responsable.celular;
 
                         new bootstrap.Modal(document.getElementById('editResponsableModal')).show();
 
@@ -501,6 +527,7 @@
                             rowData[1],
                             rowData[2],
                             rowData[3],
+                            rowData[4],
                             formatearFecha(new Date().toISOString()),
                             accionesPapelera(id)
                         ]).draw(false);
@@ -566,6 +593,7 @@
                             data.responsable.nombre,
                             data.responsable.cargo,
                             data.responsable.email,
+                            data.responsable.celular,
                             formatearFecha(data.responsable.created_at),
                             accionesActivos(data.responsable.id)
                         ]).draw(false);

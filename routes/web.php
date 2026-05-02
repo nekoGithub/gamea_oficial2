@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuditoriaController;
 use App\Http\Controllers\BaseDatoController;
+use App\Http\Controllers\BusquedaController;
 use App\Http\Controllers\CredencialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentoController;
@@ -49,10 +50,20 @@ Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('
 
 Route::post('/admin/users/{user}/restore', [UserController::class, 'restore'])->name('admin.users.restore');
 
+Route::post('/admin/users/check-email', [UserController::class, 'checkEmail'])
+    ->name('admin.users.checkEmail');
+
 Route::get('/verify-code', [EmailCodeVerificationController::class, 'showForm'])->name('verify.code.form');
 Route::post('/verify-code', [EmailCodeVerificationController::class, 'verify'])->name('verify.code.check');
 Route::post('/verify/resend', [EmailCodeVerificationController::class, 'resend'])->name('verify.code.resend');
 
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile/info', [App\Http\Controllers\ProfileController::class, 'updateInfo'])->name('profile.update.info');
+    Route::post('/profile/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.update.password');
+});
 // Roles
 
 route::get('/admin/roles', [Rolecontroller::class, 'index'])->name('admin.roles.index');
@@ -166,6 +177,9 @@ Route::get('/admin/tecnologias/{id}/scrape', [TecnologiaController::class, 'scra
 
 // Credenciales
 
+Route::get('/admin/credenciales/buscar-sistema', [CredencialController::class, 'buscarSistema'])
+    ->name('admin.credenciales.buscarSistema');
+
 Route::get('/admin/credenciales/', [CredencialController::class, 'index'])->name('admin.credenciales.index');
 
 Route::post('/admin/credenciales/', [CredencialController::class, 'store'])->name('admin.credenciales.store');
@@ -220,6 +234,9 @@ Route::delete('/admin/sistemas/{sistema}/versiones/upload/{upload}/cancelar', [S
     ->name('admin.sistemas.versiones.upload.cancelar');
 
 // sistemas versiones
+
+Route::get('/admin/sistemas/{sistema}/versiones/{version}/descargar/{tipo}', [SistemaVersionController::class, 'descargar'])
+    ->name('admin.sistemas.versiones.descargar');
 
 Route::get('/admin/sistemas/{sistema}/versiones/check-duplicate', [SistemaVersionController::class, 'checkDuplicate'])
     ->name('admin.sistemas.versiones.check-duplicate');
@@ -308,6 +325,8 @@ Route::get('/admin/notificaciones/{notificacion}/detalle', [NotificacionControll
     ->name('admin.notificaciones.show');
 
 // Auditorías
+Route::get('/auditorias/count', [AuditoriaController::class, 'count'])->name('admin.auditorias.count');
+
 Route::get('admin/auditorias', [AuditoriaController::class, 'index'])->name('admin.auditorias.index');
 
 Route::get('admin/auditorias/datatable', [AuditoriaController::class, 'datatable'])->name('admin.auditorias.datatable');
@@ -317,6 +336,7 @@ Route::get('admin/auditorias/exportar-pdf', [AuditoriaController::class, 'export
 Route::get('admin/auditorias/{auditoria}', [AuditoriaController::class, 'show'])->name('admin.auditorias.show');
 
 Route::delete('admin/auditorias/limpiar', [AuditoriaController::class, 'limpiar'])->name('admin.auditorias.limpiar');
+
 
 // reportes 
 // Dashboard de reportes
@@ -347,3 +367,25 @@ Route::get('admin/reportes/sistemas/exportar-excel', [ReporteController::class, 
 Route::get('/register', function () {
     return response()->view('admin.errors.404', [], 404);
 });
+
+// busqueda de sistemas 
+Route::get('/admin/buscar', [BusquedaController::class, 'index'])
+    ->name('admin.buscar')
+    ->middleware('auth');
+
+
+Route::get('/test-websocket', function () {
+    return view('test-websocket');
+})->middleware('auth');
+
+Route::get('/admin/monitoreo/servidores', [App\Http\Controllers\MonitoreoController::class, 'index'])
+    ->name('admin.monitoreo.index')
+    ->middleware('auth');
+
+Route::get('/admin/monitoreo/servidores/{servidor}/ping', [App\Http\Controllers\MonitoreoController::class, 'pingServidor'])
+    ->name('admin.monitoreo.ping')
+    ->middleware('auth');
+
+Route::get('/admin/monitoreo/sistemas/{sistema}/ping', [App\Http\Controllers\MonitoreoController::class, 'pingSistema'])
+    ->name('admin.monitoreo.ping.sistema')
+    ->middleware('auth');

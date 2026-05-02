@@ -121,9 +121,9 @@
                  @if (auth()->check())
                      <a class="link-reset d-flex align-items-center gap-2 flex-grow-1" href="/">
                          <!-- Avatar del Usuario (más pequeño) -->
-                         @if (auth()->user()->avatar)
+                         @if (auth()->user()->profile_photo_path)
                              <img alt="{{ auth()->user()->name }}" class="rounded-circle"
-                                 src="{{ asset('storage/' . auth()->user()->avatar) }}"
+                                 src="{{ asset('storage/avatars/' . auth()->user()->profile_photo_path) }}"
                                  style="width: 40px; height: 40px; object-fit: cover;" />
                          @else
                              <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
@@ -232,167 +232,235 @@
                  </li>
              @endcan
 
-             <!-- ========== SISTEMAS (Principal) ========== -->
-             <li class="side-nav-title mt-2">Sistemas</li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.sistemas.index') }}">
-                     <span class="menu-icon"><i data-lucide="layout-dashboard"></i></span>
-                     <span class="menu-text">Sistemas</span>
-                 </a>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.servidores.index') }}">
-                     <span class="menu-icon"><i data-lucide="server"></i></span>
-                     <span class="menu-text">Servidores</span>
-                 </a>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.tecnologias.index') }}">
-                     <span class="menu-icon"><i data-lucide="cpu"></i></span>
-                     <span class="menu-text">Tecnologías</span>
-                 </a>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.sistemas-operativos.index') }}">
-                     <span class="menu-icon"><i data-lucide="terminal"></i></span>
-                     <span class="menu-text">Sistemas Operativos</span>
-                 </a>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.bases-datos.index') }}">
-                     <span class="menu-icon"><i data-lucide="database"></i></span>
-                     <span class="menu-text">Bases de Datos</span>
-                 </a>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.documentos.index') }}">
-                     <span class="menu-icon"><i data-lucide="files"></i></span>
-                     <span class="menu-text">Documentos</span>
-                 </a>
-             </li>
+             <!-- ========== SISTEMAS ========== -->
+             @canany(['admin.sistemas.index', 'admin.servidores.index', 'admin.tecnologias.index',
+                 'admin.sistemas-operativos.index', 'admin.bases-datos.index', 'admin.documentos.index'])
+                 <li class="side-nav-title mt-2">Sistemas</li>
+             @endcanany
+
+             @can('admin.sistemas.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.sistemas.index') }}">
+                         <span class="menu-icon"><i data-lucide="layout-dashboard"></i></span>
+                         <span class="menu-text">Sistemas</span>
+                     </a>
+                 </li>
+             @endcan
+
+             @can('admin.servidores.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.servidores.index') }}">
+                         <span class="menu-icon"><i data-lucide="server"></i></span>
+                         <span class="menu-text">Servidores</span>
+                     </a>
+                 </li>
+             @endcan
+
+             @can('admin.tecnologias.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.tecnologias.index') }}">
+                         <span class="menu-icon"><i data-lucide="cpu"></i></span>
+                         <span class="menu-text">Tecnologías</span>
+                     </a>
+                 </li>
+             @endcan
+
+             @can('admin.sistemas-operativos.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.sistemas-operativos.index') }}">
+                         <span class="menu-icon"><i data-lucide="terminal"></i></span>
+                         <span class="menu-text">Sistemas Operativos</span>
+                     </a>
+                 </li>
+             @endcan
+
+             @can('admin.bases-datos.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.bases-datos.index') }}">
+                         <span class="menu-icon"><i data-lucide="database"></i></span>
+                         <span class="menu-text">Bases de Datos</span>
+                     </a>
+                 </li>
+             @endcan
+
+             @can('admin.documentos.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.documentos.index') }}">
+                         <span class="menu-icon"><i data-lucide="files"></i></span>
+                         <span class="menu-text">Documentos</span>
+                     </a>
+                 </li>
+             @endcan
 
              <!-- ========== ORGANIZACIÓN ========== -->
-             <li class="side-nav-title mt-2">Organización</li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.unidades.index') }}">
-                     <span class="menu-icon"><i data-lucide="building"></i></span>
-                     <span class="menu-text">Unidades</span>
-                 </a>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.responsables.index') }}">
-                     <span class="menu-icon"><i data-lucide="user-check"></i></span>
-                     <span class="menu-text">Responsables</span>
-                 </a>
-             </li>
+             @canany(['admin.unidades.index', 'admin.responsables.index'])
+                 <li class="side-nav-title mt-2">Organización</li>
+             @endcanany
 
-             <!-- ========== GESTIÓN DE USUARIOS (Único con subnivel) ========== -->
-             <li class="side-nav-title mt-2">Gestión</li>
-             <li class="side-nav-item">
-                 <a aria-controls="sidebarUsuarios" aria-expanded="false" class="side-nav-link"
-                     data-bs-toggle="collapse" href="#sidebarUsuarios">
-                     <span class="menu-icon"><i data-lucide="users"></i></span>
-                     <span class="menu-text">Usuarios</span>
-                     <span class="menu-arrow"></span>
-                 </a>
-                 <div class="collapse" id="sidebarUsuarios">
-                     <ul class="sub-menu">
-                         @can('admin.users.index')
-                             <li class="side-nav-item">
-                                 <a class="side-nav-link" href="{{ route('admin.users.index') }}">
-                                     <span class="menu-text">Lista de Usuarios</span>
-                                 </a>
-                             </li>
-                         @endcan
-                         @can('profile.show')
-                             <li class="side-nav-item">
-                                 <a class="side-nav-link" href="{{ route('profile.show') }}">
-                                     <span class="menu-text">Mi Perfil</span>
-                                 </a>
-                             </li>
-                         @endcan
-                         <li class="side-nav-item">
-                             <a class="side-nav-link" href="{{ route('admin.roles.index') }}">
-                                 <span class="menu-text">Roles y Permisos</span>
-                             </a>
-                         </li>
-                     </ul>
-                 </div>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.uploads.index') }}">
-                     <span class="menu-icon"><i data-lucide="upload-cloud"></i></span>
-                     <span class="menu-text">Uploads</span>
-                     @php
-                         $uploadsPendientes = \App\Models\VersionUpload::where('user_id', auth()->id())
-                             ->whereIn('estado', ['pendiente', 'procesando'])
-                             ->count();
-                     @endphp
-                     @if ($uploadsPendientes > 0)
-                         <span class="badge bg-warning rounded-pill ms-auto">{{ $uploadsPendientes }}</span>
-                     @endif
-                 </a>
-             </li>
+             @can('admin.unidades.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.unidades.index') }}">
+                         <span class="menu-icon"><i data-lucide="building"></i></span>
+                         <span class="menu-text">Unidades</span>
+                     </a>
+                 </li>
+             @endcan
+
+             @can('admin.responsables.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.responsables.index') }}">
+                         <span class="menu-icon"><i data-lucide="user-check"></i></span>
+                         <span class="menu-text">Responsables</span>
+                     </a>
+                 </li>
+             @endcan
+
+             <!-- ========== GESTIÓN ========== -->
+             @canany(['admin.users.index', 'profile.show', 'admin.roles.index', 'admin.uploads.index'])
+                 <li class="side-nav-title mt-2">Gestión</li>
+             @endcanany
+
+             @canany(['admin.users.index', 'profile.show', 'admin.roles.index'])
+                 <li class="side-nav-item">
+                     <a aria-controls="sidebarUsuarios" aria-expanded="false" class="side-nav-link"
+                         data-bs-toggle="collapse" href="#sidebarUsuarios">
+                         <span class="menu-icon"><i data-lucide="users"></i></span>
+                         <span class="menu-text">Usuarios</span>
+                         <span class="menu-arrow"></span>
+                     </a>
+                     <div class="collapse" id="sidebarUsuarios">
+                         <ul class="sub-menu">
+                             @can('admin.users.index')
+                                 <li class="side-nav-item">
+                                     <a class="side-nav-link" href="{{ route('admin.users.index') }}">
+                                         <span class="menu-text">Lista de Usuarios</span>
+                                     </a>
+                                 </li>
+                             @endcan
+                             @can('profile.show')
+                                 <li class="side-nav-item">
+                                     <a class="side-nav-link" href="{{ route('profile.show') }}">
+                                         <span class="menu-text">Mi Perfil</span>
+                                     </a>
+                                 </li>
+                             @endcan
+                             @can('admin.roles.index')
+                                 <li class="side-nav-item">
+                                     <a class="side-nav-link" href="{{ route('admin.roles.index') }}">
+                                         <span class="menu-text">Roles y Permisos</span>
+                                     </a>
+                                 </li>
+                             @endcan
+                         </ul>
+                     </div>
+                 </li>
+             @endcanany
+
+             @can('admin.uploads.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.uploads.index') }}">
+                         <span class="menu-icon"><i data-lucide="upload-cloud"></i></span>
+                         <span class="menu-text">Uploads</span>
+                         @php
+                             $uploadsPendientes = \App\Models\VersionUpload::where('user_id', auth()->id())
+                                 ->whereIn('estado', ['pendiente', 'procesando'])
+                                 ->count();
+                         @endphp
+                         @if ($uploadsPendientes > 0)
+                             <span class="badge bg-warning rounded-pill ms-auto">{{ $uploadsPendientes }}</span>
+                         @endif
+                     </a>
+                 </li>
+             @endcan
 
              <!-- ========== SEGURIDAD ========== -->
-             <li class="side-nav-title mt-2">Seguridad</li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.ssls.index') }}">
-                     <span class="menu-icon"><i data-lucide="shield-check"></i></span>
-                     <span class="menu-text">Certificados SSL</span>
-                 </a>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.credenciales.index') }}">
-                     <span class="menu-icon"><i data-lucide="key-round"></i></span>
-                     <span class="menu-text">Credenciales</span>
-                 </a>
-             </li>
+             @canany(['admin.ssls.index', 'admin.credenciales.index'])
+                 <li class="side-nav-title mt-2">Seguridad</li>
+             @endcanany
+
+             @can('admin.ssls.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.ssls.index') }}">
+                         <span class="menu-icon"><i data-lucide="shield-check"></i></span>
+                         <span class="menu-text">Certificados SSL</span>
+                     </a>
+                 </li>
+             @endcan
+
+             @can('admin.credenciales.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.credenciales.index') }}">
+                         <span class="menu-icon"><i data-lucide="key-round"></i></span>
+                         <span class="menu-text">Credenciales</span>
+                     </a>
+                 </li>
+             @endcan
 
              <!-- ========== ALERTAS Y SEGUIMIENTO ========== -->
-             <li class="side-nav-title mt-2">Alertas y Seguimiento</li>
+             @canany(['admin.notificaciones.index', 'admin.auditorias.index'])
+                 <li class="side-nav-title mt-2">Alertas y Seguimiento</li>
+             @endcanany
+
+             @can('admin.notificaciones.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.notificaciones.index') }}">
+                         <span class="menu-icon"><i data-lucide="bell"></i></span>
+                         <span class="menu-text">Notificaciones</span>
+                         @php
+                             $pendientes = \App\Models\Notificacion::where('estado', 'pendiente')->count();
+                         @endphp
+                         @if ($pendientes > 0)
+                             <span class="badge bg-danger rounded-pill ms-auto">{{ $pendientes }}</span>
+                         @endif
+                     </a>
+                 </li>
+             @endcan
+
+             @can('admin.auditorias.index')
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.auditorias.index') }}">
+                         <span class="menu-icon"><i data-lucide="file-search"></i></span>
+                         <span class="menu-text">Auditorías</span>
+                     </a>
+                 </li>
+             @endcan
+
              <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.notificaciones.index') }}">
-                     <span class="menu-icon"><i data-lucide="bell"></i></span>
-                     <span class="menu-text">Notificaciones</span>
+                 <a class="side-nav-link" href="{{ route('admin.monitoreo.index') }}">
+                     <span class="menu-icon"><i data-lucide="activity"></i></span>
+                     <span class="menu-text">Monitoreo</span>
                      @php
-                         $pendientes = \App\Models\Notificacion::where('estado', 'pendiente')->count();
+                         $servidoresCaidos = \App\Models\Servidor::where('estado', 'activo')
+                             ->where('disponibilidad_interna', 'INACTIVO')
+                             ->count();
                      @endphp
-                     @if ($pendientes > 0)
-                         <span class="badge bg-danger rounded-pill ms-auto">{{ $pendientes }}</span>
+                     @if ($servidoresCaidos > 0)
+                         <span class="badge bg-danger rounded-pill ms-auto">{{ $servidoresCaidos }}</span>
                      @endif
-                 </a>
-             </li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.auditorias.index') }}">
-                     <span class="menu-icon"><i data-lucide="file-search"></i></span>
-                     <span class="menu-text">Auditorías</span>
                  </a>
              </li>
 
              <!-- ========== REPORTES ========== -->
-             <li class="side-nav-title mt-2">Reportes</li>
-             <li class="side-nav-item">
-                 <a class="side-nav-link" href="{{ route('admin.reportes.index') }}">
-                     <span class="menu-icon"><i data-lucide="file-bar-chart"></i></span>
-                     <span class="menu-text">Reportes</span>
-                 </a>
-             </li>
+             @can('admin.reportes.index')
+                 <li class="side-nav-title mt-2">Reportes</li>
+                 <li class="side-nav-item">
+                     <a class="side-nav-link" href="{{ route('admin.reportes.index') }}">
+                         <span class="menu-icon"><i data-lucide="file-bar-chart"></i></span>
+                         <span class="menu-text">Reportes</span>
+                     </a>
+                 </li>
+             @endcan
 
              <!-- ========== SALIR ========== -->
-             <li class="side-nav-item   ">
+             <li class="side-nav-item">
                  <form id="logout-form" method="POST" action="{{ route('logout') }}">
                      @csrf
                      <a href="javascript:void(0);" class="side-nav-link text-danger" onclick="confirmLogout()">
-                         <span class="menu-icon">
-                             <i data-lucide="log-out"></i>
-                         </span>
+                         <span class="menu-icon"><i data-lucide="log-out"></i></span>
                          <span class="menu-text">Salir</span>
                      </a>
                  </form>
              </li>
-
-
 
          </ul>
      </div>

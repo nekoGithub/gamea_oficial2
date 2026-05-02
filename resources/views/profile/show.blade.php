@@ -28,8 +28,11 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-4">
                             <div class="me-3 position-relative">
-                                <img alt="avatar" class="rounded-circle" height="72" 
-                                    src="{{ Auth::user()->profile_photo_url }}" width="72" />
+                                <img alt="avatar" class="rounded-circle" height="72"
+                                    src="{{ Auth::user()->profile_photo_path
+                                        ? asset('storage/avatars/' . Auth::user()->profile_photo_path)
+                                        : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
+                                    width="72" />
                             </div>
                             <div>
                                 <h5 class="mb-0 d-flex align-items-center">
@@ -38,14 +41,15 @@
                                 <p class="text-muted mb-2">{{ Auth::user()->email }}</p>
                                 <span class="badge text-bg-light badge-label">Mienbro</span>
                             </div>
-                            <div class="ms-auto">
+                            {{-- <div class="ms-auto">
                                 <div class="dropdown">
                                     <a class="btn btn-icon btn-ghost-light text-muted" data-bs-toggle="dropdown"
                                         href="#">
                                         <i class="ti ti-dots-vertical fs-xl"></i>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="#settings" data-bs-toggle="tab">Edit Profile</a></li>
+                                        <li><a class="dropdown-item" href="#settings" data-bs-toggle="tab">Edit Profile</a>
+                                        </li>
                                         <li>
                                             <form method="POST" action="{{ route('logout') }}">
                                                 @csrf
@@ -54,7 +58,7 @@
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="">
@@ -72,7 +76,8 @@
                                     class="avatar-sm text-bg-light bg-opacity-75 d-flex align-items-center justify-content-center rounded-circle">
                                     <i class="ti ti-calendar fs-xl"></i>
                                 </div>
-                                <p class="mb-0 fs-sm">Mienbro desde <span class="text-dark fw-semibold">{{ Auth::user()->created_at->format('M Y') }}</span>
+                                <p class="mb-0 fs-sm">Mienbro desde <span
+                                        class="text-dark fw-semibold">{{ Auth::user()->created_at->format('M Y') }}</span>
                                 </p>
                             </div>
                         </div>
@@ -94,35 +99,21 @@
                                 </a>
                             </li>
                             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
-                            <li class="nav-item">
-                                <a aria-expanded="false" class="nav-link" data-bs-toggle="tab" href="#password">
-                                    <i class="ti ti-lock d-md-none d-block"></i>
-                                    <span class="d-none d-md-block fw-bold">Contraseña</span>
-                                </a>
-                            </li>
+                                <li class="nav-item">
+                                    <a aria-expanded="false" class="nav-link" data-bs-toggle="tab" href="#password">
+                                        <i class="ti ti-lock d-md-none d-block"></i>
+                                        <span class="d-none d-md-block fw-bold">Contraseña</span>
+                                    </a>
+                                </li>
                             @endif
-                            @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
-                            <li class="nav-item">
-                                <a aria-expanded="false" class="nav-link" data-bs-toggle="tab" href="#two-factor">
-                                    <i class="ti ti-shield-lock d-md-none d-block"></i>
-                                    <span class="d-none d-md-block fw-bold">2FA</span>
-                                </a>
-                            </li>
-                            @endif
+
                             <li class="nav-item">
                                 <a aria-expanded="false" class="nav-link" data-bs-toggle="tab" href="#sessions">
                                     <i class="ti ti-devices d-md-none d-block"></i>
                                     <span class="d-none d-md-block fw-bold">Sesiones</span>
                                 </a>
                             </li>
-                            @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
-                            <li class="nav-item">
-                                <a aria-expanded="false" class="nav-link" data-bs-toggle="tab" href="#delete-account">
-                                    <i class="ti ti-trash d-md-none d-block"></i>
-                                    <span class="d-none d-md-block fw-bold">Eliminar cuenta</span>
-                                </a>
-                            </li>
-                            @endif
+
                         </ul>
                     </div>
 
@@ -137,29 +128,19 @@
 
                             {{-- Update Password --}}
                             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::updatePasswords()))
-                            <div class="tab-pane" id="password">
-                                @livewire('profile.update-password-form')
-                            </div>
+                                <div class="tab-pane" id="password">
+                                    @livewire('profile.update-password-form')
+                                </div>
                             @endif
 
-                            {{-- Two Factor Authentication --}}
-                            @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
-                            <div class="tab-pane" id="two-factor">
-                                @livewire('profile.two-factor-authentication-form')
-                            </div>
-                            @endif
+
 
                             {{-- Browser Sessions --}}
                             <div class="tab-pane" id="sessions">
                                 @livewire('profile.logout-other-browser-sessions-form')
                             </div>
 
-                            {{-- Delete Account --}}
-                            @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
-                            <div class="tab-pane" id="delete-account">
-                                @livewire('profile.delete-user-form')
-                            </div>
-                            @endif
+
                         </div>
                     </div>
                 </div>

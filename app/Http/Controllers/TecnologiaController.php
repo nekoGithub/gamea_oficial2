@@ -13,6 +13,15 @@ use Illuminate\Support\Str;
 
 class TecnologiaController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.tecnologias.index')->only('index');
+        $this->middleware('can:admin.tecnologias.store')->only('store');
+        $this->middleware('can:admin.tecnologias.edit')->only('edit');
+        $this->middleware('can:admin.tecnologias.update')->only(['update', 'scrapeInfo']);
+        $this->middleware('can:admin.tecnologias.destroy')->only('destroy');
+        $this->middleware('can:admin.tecnologias.restore')->only('restore');
+    }
     public function index()
     {
         $tecnologias = Tecnologia::orderBy('id', 'desc')->get();
@@ -31,26 +40,28 @@ class TecnologiaController extends Controller
      */
     public function store(Request $request)
     {
+        $anioMax = now()->year + 5;
         $validated = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'version' => 'required|string|max:50',
+            'nombre' => 'required|string|max:45',
+            'version' => 'required|string|max:15',
             'descripcion' => 'nullable|string|max:1000',
-            'url_documentacion' => 'nullable|url|max:255',
-            'fecha_lanzamiento' => 'nullable|date',
-            'fecha_fin_soporte' => 'nullable|date|after_or_equal:fecha_lanzamiento',
+            'url_documentacion' => 'nullable|url|max:120',
+            'fecha_lanzamiento'  => ['nullable', 'date', 'after_or_equal:2015-01-01', 'before_or_equal:' . $anioMax . '-12-31'],
+            'fecha_fin_soporte'  => ['nullable', 'date', 'after_or_equal:fecha_lanzamiento', 'after_or_equal:2015-01-01', 'before_or_equal:' . $anioMax . '-12-31'],
             'tipo' => 'required|in:backend,frontend,otros/librerias',
             'estado' => 'required|in:activo,inactivo',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 100 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 45 caracteres.',
             'version.required' => 'La versión es obligatoria.',
-            'version.max' => 'La versión no puede exceder 50 caracteres.',
+            'version.max' => 'La versión no puede exceder 15 caracteres.',
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres.',
             'url_documentacion.url' => 'Debe ingresar una URL válida.',
-            'url_documentacion.max' => 'La URL no puede exceder 255 caracteres.',
-            'fecha_lanzamiento.date' => 'Debe ingresar una fecha válida.',
-            'fecha_fin_soporte.date' => 'Debe ingresar una fecha válida.',
-            'fecha_fin_soporte.after_or_equal' => 'La fecha de fin de soporte debe ser posterior a la fecha de lanzamiento.',
+            'url_documentacion.max' => 'La URL no puede exceder 120 caracteres.',
+            'fecha_lanzamiento.after_or_equal'  => 'La fecha debe ser desde el año 2015.',
+            'fecha_lanzamiento.before_or_equal' => 'La fecha no puede exceder ' . $anioMax . '.',
+            'fecha_fin_soporte.after_or_equal'  => 'La fecha de fin debe ser posterior a la de lanzamiento y desde 2015.',
+            'fecha_fin_soporte.before_or_equal' => 'La fecha no puede exceder ' . $anioMax . '.',
             'tipo.required' => 'Debe seleccionar un tipo.',
             'tipo.in' => 'El tipo debe ser backend, frontend u otros/librerias.',
             'estado.required' => 'El estado es obligatorio.',
@@ -80,26 +91,28 @@ class TecnologiaController extends Controller
      */
     public function update(Request $request, Tecnologia $tecnologia)
     {
+        $anioMax = now()->year + 5;
         $validated = $request->validate([
-            'nombre' => 'required|string|max:100',
-            'version' => 'required|string|max:50',
+            'nombre' => 'required|string|max:45',
+            'version' => 'required|string|max:15',
             'descripcion' => 'nullable|string|max:1000',
-            'url_documentacion' => 'nullable|url|max:255',
-            'fecha_lanzamiento' => 'nullable|date',
-            'fecha_fin_soporte' => 'nullable|date|after_or_equal:fecha_lanzamiento',
+            'url_documentacion' => 'nullable|url|max:120',
+            'fecha_lanzamiento'  => ['nullable', 'date', 'after_or_equal:2015-01-01', 'before_or_equal:' . $anioMax . '-12-31'],
+            'fecha_fin_soporte'  => ['nullable', 'date', 'after_or_equal:fecha_lanzamiento', 'after_or_equal:2015-01-01', 'before_or_equal:' . $anioMax . '-12-31'],
             'tipo' => 'required|in:backend,frontend,otros/librerias',
             'estado' => 'required|in:activo,inactivo',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 100 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 45 caracteres.',
             'version.required' => 'La versión es obligatoria.',
-            'version.max' => 'La versión no puede exceder 50 caracteres.',
+            'version.max' => 'La versión no puede exceder 15 caracteres.',
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres.',
             'url_documentacion.url' => 'Debe ingresar una URL válida.',
-            'url_documentacion.max' => 'La URL no puede exceder 255 caracteres.',
-            'fecha_lanzamiento.date' => 'Debe ingresar una fecha válida.',
-            'fecha_fin_soporte.date' => 'Debe ingresar una fecha válida.',
-            'fecha_fin_soporte.after_or_equal' => 'La fecha de fin de soporte debe ser posterior a la fecha de lanzamiento.',
+            'url_documentacion.max' => 'La URL no puede exceder 120 caracteres.',
+            'fecha_lanzamiento.after_or_equal'  => 'La fecha debe ser desde el año 2015.',
+            'fecha_lanzamiento.before_or_equal' => 'La fecha no puede exceder ' . $anioMax . '.',
+            'fecha_fin_soporte.after_or_equal'  => 'La fecha de fin debe ser posterior a la de lanzamiento y desde 2015.',
+            'fecha_fin_soporte.before_or_equal' => 'La fecha no puede exceder ' . $anioMax . '.',
             'tipo.required' => 'Debe seleccionar un tipo.',
             'tipo.in' => 'El tipo debe ser backend, frontend u otros/librerias.',
             'estado.required' => 'El estado es obligatorio.',

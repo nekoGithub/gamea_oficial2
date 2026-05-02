@@ -32,7 +32,8 @@
                         <input class="form-check-input" id="demo-skin-material" name="data-skin" type="radio"
                             value="material" />
                         <label class="form-check-label p-0 w-100" for="demo-skin-material">
-                            <img alt="tema-material" class="img-fluid" src="/images/layouts/themes/theme-material.png" />
+                            <img alt="tema-material" class="img-fluid"
+                                src="/images/layouts/themes/theme-material.png" />
                         </label>
                     </div>
                     <h5 class="text-center text-muted mt-2 mb-0">Material</h5>
@@ -88,8 +89,9 @@
                     <div class="form-check card-radio">
                         <input class="form-check-input" id="layout-color-light" name="data-bs-theme" type="radio"
                             value="light" />
-                        <label class="form-check-label p-0 w-100" for="layout-color-light">
+                        <label class="form-check-label p-0 w-100 position-relative" for="layout-color-light">
                             <img alt="modo-claro" class="img-fluid" src="/images/layouts/light.svg" />
+                            <i class="ti ti-circle-check-filled color-scheme-check"></i> {{-- ✅ AGREGAR --}}
                         </label>
                     </div>
                     <h5 class="text-center text-muted mt-2 mb-0">Claro</h5>
@@ -98,8 +100,9 @@
                     <div class="form-check card-radio">
                         <input class="form-check-input" id="layout-color-dark" name="data-bs-theme" type="radio"
                             value="dark" />
-                        <label class="form-check-label p-0 w-100" for="layout-color-dark">
+                        <label class="form-check-label p-0 w-100 position-relative" for="layout-color-dark">
                             <img alt="modo-oscuro" class="img-fluid" src="/images/layouts/dark.svg" />
+                            <i class="ti ti-circle-check-filled color-scheme-check"></i> {{-- ✅ AGREGAR --}}
                         </label>
                     </div>
                     <h5 class="text-center text-muted mt-2 mb-0">Oscuro</h5>
@@ -108,8 +111,9 @@
                     <div class="form-check card-radio">
                         <input class="form-check-input" id="layout-color-system" name="data-bs-theme" type="radio"
                             value="system" />
-                        <label class="form-check-label p-0 w-100" for="layout-color-system">
+                        <label class="form-check-label p-0 w-100 position-relative" for="layout-color-system">
                             <img alt="modo-sistema" class="img-fluid" src="/images/layouts/system.svg" />
+                            <i class="ti ti-circle-check-filled color-scheme-check"></i> {{-- ✅ AGREGAR --}}
                         </label>
                     </div>
                     <h5 class="text-center text-muted mt-2 mb-0">Sistema</h5>
@@ -156,7 +160,8 @@
                         <input class="form-check-input" id="topbar-color-gradient" name="data-topbar-color"
                             type="radio" value="gradient" />
                         <label class="form-check-label p-0 w-100" for="topbar-color-gradient">
-                            <img alt="topbar-gradiente" class="img-fluid" src="/images/layouts/topbar-gradient.svg" />
+                            <img alt="topbar-gradiente" class="img-fluid"
+                                src="/images/layouts/topbar-gradient.svg" />
                         </label>
                     </div>
                     <h5 class="fs-sm text-center text-muted mt-2 mb-0">Gradiente</h5>
@@ -240,7 +245,8 @@
                         <input class="form-check-input" id="sidenav-size-compact" name="data-sidenav-size"
                             type="radio" value="compact" />
                         <label class="form-check-label p-0 w-100" for="sidenav-size-compact">
-                            <img alt="sidebar-compacto" class="img-fluid" src="/images/layouts/sidebar-compact.svg" />
+                            <img alt="sidebar-compacto" class="img-fluid"
+                                src="/images/layouts/sidebar-compact.svg" />
                         </label>
                     </div>
                     <h5 class="mb-0 text-center text-muted mt-2">Compacto</h5>
@@ -307,7 +313,8 @@
         <!-- Info de Usuario en Sidebar -->
         <div class="p-3">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><label class="fw-bold m-0" for="sidebaruser-check">Info de Usuario en Barra</label></h5>
+                <h5 class="mb-0"><label class="fw-bold m-0" for="sidebaruser-check">Info de Usuario en
+                        Barra</label></h5>
                 <div class="form-check form-switch fs-lg">
                     <input class="form-check-input" id="sidebaruser-check" name="sidebar-user" type="checkbox" />
                 </div>
@@ -318,12 +325,24 @@
     <!-- Footer con Botones -->
     <div class="offcanvas-footer border-top p-3 text-center">
         <div class="row">
-            <div class="col-6">
-                <button class="btn btn-light fw-semibold py-2 w-100" id="reset-layout" type="button">Restablecer</button>
-            </div>
-            <div class="col-6">
-                <button class="btn btn-primary bg-gradient py-2 fw-semibold w-100" type="button">Aplicar</button>
+            <div class="col-12">
+                <button class="btn btn-danger fw-semibold py-2 w-100" id="reset-layout"
+                    type="button">Restablecer</button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .color-scheme-check {
+        display: none;
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        font-size: 1.2rem;
+        color: #D32F2F;
+        background: white;
+        border-radius: 50%;
+        line-height: 1;
+    }
+</style>

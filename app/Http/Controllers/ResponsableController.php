@@ -7,6 +7,17 @@ use Illuminate\Http\Request;
 
 class ResponsableController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.responsables.index')->only('index');
+        $this->middleware('can:admin.responsables.store')->only('store');
+        $this->middleware('can:admin.responsables.show')->only('show');
+        $this->middleware('can:admin.responsables.edit')->only('edit');
+        $this->middleware('can:admin.responsables.update')->only('update');
+        $this->middleware('can:admin.responsables.destroy')->only('destroy');
+        $this->middleware('can:admin.responsables.restore')->only('restore');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -35,20 +46,24 @@ class ResponsableController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:150',
-            'cargo'  => 'required|string|max:100',
-            'email'  => 'required|email|max:150|unique:responsables,email',
+            'nombre' => 'required|string|max:50',
+            'cargo'  => 'required|string|max:80',
+            'email'  => 'nullable|email|max:150|unique:responsables,email',
+            'celular'  => 'required|string|max:20',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 150 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 50 caracteres.',
 
             'cargo.required' => 'El cargo es obligatorio.',
-            'cargo.max' => 'El cargo no puede exceder 100 caracteres.',
+            'cargo.max' => 'El cargo no puede exceder 80 caracteres.',
 
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'El correo electrónico debe ser una dirección válida.',
             'email.max' => 'El correo electrónico no puede exceder 150 caracteres.',
             'email.unique' => 'Ya existe un responsable con este correo electrónico.',
+
+            'celular.required' => 'El celular es obligatorio.',
+            'celular.max' => 'El celular no puede exceder 20 caracteres.',
         ]);
 
         $responsable = Responsable::create($validated);
@@ -83,20 +98,23 @@ class ResponsableController extends Controller
     public function update(Request $request, Responsable $responsable)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:150',
-            'cargo'  => 'required|string|max:100',
-            'email'  => 'required|email|max:150|unique:responsables,email,' . $responsable->id,
+            'nombre' => 'required|string|max:50',
+            'cargo'  => 'required|string|max:80',
+            'email'  => 'nullable|email|max:150|unique:responsables,email,' . $responsable->id,
+            'celular'  => 'required|string|max:20',
         ], [
             'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 150 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 50 caracteres.',
 
             'cargo.required' => 'El cargo es obligatorio.',
-            'cargo.max' => 'El cargo no puede exceder 100 caracteres.',
+            'cargo.max' => 'El cargo no puede exceder 80 caracteres.',
 
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'El correo electrónico debe ser una dirección válida.',
             'email.max' => 'El correo electrónico no puede exceder 150 caracteres.',
             'email.unique' => 'Ya existe un responsable con este correo electrónico.',
+            'celular.required' => 'El celular es obligatorio.',
+            'celular.max' => 'El celular no puede exceder 20 caracteres.',
         ]);
 
         $responsable->update($validated);

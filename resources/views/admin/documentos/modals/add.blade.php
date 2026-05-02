@@ -35,7 +35,7 @@
                             maxlength="100"
                         >
                         <div class="invalid-feedback">El nombre es obligatorio.</div>
-                        <small class="text-muted">Máximo 100 caracteres</small>
+                        <small class="text-muted">Máximo 45 caracteres</small>
                     </div>
 
                     <!-- Info -->

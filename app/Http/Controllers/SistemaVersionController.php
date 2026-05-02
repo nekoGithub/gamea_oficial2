@@ -19,6 +19,17 @@ use Illuminate\Support\Facades\Storage;
 
 class SistemaVersionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.versiones.index')->only(['index', 'checkDuplicate', 'listarUploads']);
+        $this->middleware('can:admin.versiones.store')->only(['create', 'store', 'iniciarUpload', 'uploadChunk', 'uploadManualChunk', 'completarUpload']);
+        $this->middleware('can:admin.versiones.edit')->only(['edit', 'getUploadStatus']);
+        $this->middleware('can:admin.versiones.update')->only('update');
+        $this->middleware('can:admin.versiones.actual')->only('marcarActual');
+        $this->middleware('can:admin.versiones.destroy')->only(['destroy', 'cancelarUpload']);
+        $this->middleware('can:admin.versiones.restore')->only('restore');
+        $this->middleware('can:admin.versiones.show')->only('descargar');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -42,7 +53,10 @@ class SistemaVersionController extends Controller
         $tecnologias = Tecnologia::where('estado', 'activo')->orderBy('nombre')->get();
         $servidores = Servidor::where('estado', 'activo')->orderBy('nombre')->get();
         $basesDatos = BaseDato::where('estado', 'activo')->orderBy('gestor')->get();
-        $credenciales = Credencial::where('estado', 'activo')->orderBy('usuario')->get();
+        $credenciales = Credencial::where('estado', 'activo')
+            ->where('sistema_id', $sistema->id)
+            ->orderBy('usuario')
+            ->get();
 
         return view('admin.sistemas.versiones.index', compact(
             'sistema',
@@ -63,7 +77,10 @@ class SistemaVersionController extends Controller
         $tecnologias = Tecnologia::where('estado', 'activo')->orderBy('nombre')->get();
         $servidores = Servidor::where('estado', 'activo')->orderBy('nombre')->get();
         $basesDatos = BaseDato::where('estado', 'activo')->orderBy('gestor')->get();
-        $credenciales = Credencial::where('estado', 'activo')->orderBy('usuario')->get();
+        $credenciales = Credencial::where('estado', 'activo')
+            ->where('sistema_id', $sistema->id)
+            ->orderBy('usuario')
+            ->get();
 
         $documentos = Documento::where('activo', 1)
             ->orderBy('nombre')
@@ -112,14 +129,39 @@ class SistemaVersionController extends Controller
             'descripcion' => 'nullable|string',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'codigo_fuente' => 'required|file|mimes:zip,rar|max:10485760',
-            'manual_tecnico' => 'required|file|mimes:pdf|max:102400',
-            'manual_usuario' => 'required|file|mimes:pdf|max:102400',
+            'manual_tecnico' => 'nullable|file|mimes:pdf|max:102400',
+            'manual_usuario' => 'nullable|file|mimes:pdf|max:102400',
             'fecha_lanzamiento' => 'required|date',
+            'archivo_bd' => [
+                'nullable',
+                'file',
+                'max:512000', // 500MB
+                function ($attribute, $value, $fail) {
+                    $extensiones = [
+                        'sql',
+                        'gz',
+                        'xbk',           // MySQL/MariaDB
+                        'dump',
+                        'backup',
+                        'tar',        // PostgreSQL
+                        'bson',
+                        'json',
+                        'archive',      // MongoDB
+                        'bak',
+                        'bz2',
+                        'zip',            // General
+                    ];
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    if (!in_array($ext, $extensiones)) {
+                        $fail('El archivo de BD no tiene un formato permitido.');
+                    }
+                }
+            ],
             'estado' => 'required|in:estable,beta,deprecated',
             'tecnologias' => 'required|array|min:1',
             'servidores' => 'required|array|min:1',
             'bases_datos' => 'required|array|min:1',
-            'credenciales' => 'required|array|min:1',
+            'credenciales' => 'nullable|array',
 
             // Documentos adicionales
             'documentos' => 'nullable|array',
@@ -144,6 +186,11 @@ class SistemaVersionController extends Controller
             $validated['manual_usuario'] = $request->file('manual_usuario')->store('versiones/manuales', 'public');
         }
 
+        if ($request->hasFile('archivo_bd')) {
+            $validated['archivo_bd'] = $request->file('archivo_bd')
+                ->store('versiones/bases_datos', 'public');
+        }
+
         $validated['sistema_id'] = $sistema->id;
         $validated['publicado_por'] = Auth::id();
 
@@ -160,7 +207,7 @@ class SistemaVersionController extends Controller
         $version->tecnologias()->sync($request->tecnologias);
         $version->servidores()->sync($request->servidores);
         $version->basesDatos()->sync($request->bases_datos);
-        $version->credenciales()->sync($request->credenciales);
+        $version->credenciales()->sync($data['credenciales'] ?? []);
 
         // ✅ GUARDAR DOCUMENTOS ADICIONALES
         if ($request->has('documentos') && is_array($request->documentos)) {
@@ -227,7 +274,10 @@ class SistemaVersionController extends Controller
         $tecnologias = Tecnologia::where('estado', 'activo')->orderBy('nombre')->get();
         $servidores = Servidor::where('estado', 'activo')->orderBy('nombre')->get();
         $basesDatos = BaseDato::where('estado', 'activo')->orderBy('gestor')->get();
-        $credenciales = Credencial::where('estado', 'activo')->orderBy('usuario')->get();
+        $credenciales = Credencial::where('estado', 'activo')
+            ->where('sistema_id', $sistema->id)
+            ->orderBy('usuario')
+            ->get();
 
         $version->load(['tecnologias', 'servidores', 'basesDatos', 'credenciales', 'documentos']);
 
@@ -244,7 +294,7 @@ class SistemaVersionController extends Controller
             ->where('numero_version', $version->numero_version)
             ->whereIn('estado', ['pendiente', 'procesando'])
             ->first();
-            
+
 
         return view('admin.sistemas.versiones.edit', compact(
             'sistema',
@@ -272,12 +322,37 @@ class SistemaVersionController extends Controller
             'manual_tecnico' => 'nullable|file|mimes:pdf|max:102400',
             'manual_usuario' => 'nullable|file|mimes:pdf|max:102400',
             'fecha_lanzamiento' => 'required|date',
+            'archivo_bd' => [
+                'nullable',
+                'file',
+                'max:512000', // 500MB
+                function ($attribute, $value, $fail) {
+                    $extensiones = [
+                        'sql',
+                        'gz',
+                        'xbk',           // MySQL/MariaDB
+                        'dump',
+                        'backup',
+                        'tar',        // PostgreSQL
+                        'bson',
+                        'json',
+                        'archive',      // MongoDB
+                        'bak',
+                        'bz2',
+                        'zip',            // General
+                    ];
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    if (!in_array($ext, $extensiones)) {
+                        $fail('El archivo de BD no tiene un formato permitido.');
+                    }
+                }
+            ],
             'estado' => 'required|in:estable,beta,deprecated',
             'es_actual' => 'nullable|boolean',
             'tecnologias' => 'required|array|min:1',
             'servidores' => 'required|array|min:1',
             'bases_datos' => 'required|array|min:1',
-            'credenciales' => 'required|array|min:1',
+            'credenciales' => 'nullable|array',
 
             'documentos_nuevos_ids' => 'nullable|array',
             'documentos_nuevos_ids.*' => 'exists:documentos,id',
@@ -333,6 +408,13 @@ class SistemaVersionController extends Controller
                     Storage::disk('public')->delete($version->manual_usuario);
                 }
                 $validated['manual_usuario'] = $request->file('manual_usuario')->store('versiones/manuales', 'public');
+            }
+            if ($request->hasFile('archivo_bd')) {
+                if ($version->archivo_bd) {
+                    Storage::disk('public')->delete($version->archivo_bd);
+                }
+                $validated['archivo_bd'] = $request->file('archivo_bd')
+                    ->store('versiones/bases_datos', 'public');
             }
 
             // 🔹 MANEJAR CHECKBOX es_actual
@@ -464,6 +546,27 @@ class SistemaVersionController extends Controller
         ]);
     }
 
+    public function descargar(Sistema $sistema, SistemaVersion $version, string $tipo)
+    {
+        $archivo = match ($tipo) {
+            'codigo_fuente'  => $version->codigo_fuente,
+            'manual_tecnico' => $version->manual_tecnico,
+            'manual_usuario' => $version->manual_usuario,
+            'archivo_bd'     => $version->archivo_bd, 
+            default          => null,
+        };
+
+        if (!$archivo || !Storage::disk('public')->exists($archivo)) {
+            abort(404, 'Archivo no encontrado');
+        }
+
+        $ruta      = Storage::disk('public')->path($archivo);
+        $extension = pathinfo($archivo, PATHINFO_EXTENSION);
+        $nombre    = $tipo . '_v' . $version->numero_version . '.' . $extension;
+
+        return response()->download($ruta, $nombre);
+    }
+
     /**
      * Marcar versión como actual
      */
@@ -541,7 +644,7 @@ class SistemaVersionController extends Controller
             'tecnologias' => 'required|array|min:1',
             'servidores' => 'required|array|min:1',
             'bases_datos' => 'required|array|min:1',
-            'credenciales' => 'required|array|min:1',
+            'credenciales' => 'nullable|array',
             'version_id' => 'nullable|integer|exists:sistema_versiones,id',
             'es_actual' => 'nullable|boolean',
 
@@ -566,12 +669,15 @@ class SistemaVersionController extends Controller
                 'codigo_fuente_nombre' => 'required|string',
                 'codigo_fuente_tamano' => 'required|integer',
                 'codigo_fuente_tipo' => 'required|string',
-                'manual_tecnico_nombre' => 'required|string',
-                'manual_tecnico_tamano' => 'required|integer',
-                'manual_tecnico_tipo' => 'required|string',
-                'manual_usuario_nombre' => 'required|string',
-                'manual_usuario_tamano' => 'required|integer',
-                'manual_usuario_tipo' => 'required|string',
+                'manual_tecnico_nombre' => 'nullable|string',
+                'manual_tecnico_tamano' => 'nullable|integer',
+                'manual_tecnico_tipo'   => 'nullable|string',
+                'manual_usuario_nombre' => 'nullable|string',
+                'manual_usuario_tamano' => 'nullable|integer',
+                'manual_usuario_tipo'   => 'nullable|string',
+                'archivo_bd_nombre' => 'nullable|string',
+                'archivo_bd_tamano' => 'nullable|integer',
+                'archivo_bd_tipo'   => 'nullable|string',
             ]);
         } else {
             $rules = array_merge($rules, [
@@ -597,6 +703,13 @@ class SistemaVersionController extends Controller
                 'errors' => $e->errors()
             ]);
             throw $e;
+        }
+
+        if (!empty($validated['credenciales'])) {
+            $credencialesValidas = Credencial::where('sistema_id', $sistema->id)
+                ->whereIn('id', $validated['credenciales'])
+                ->pluck('id')->toArray();
+            $validated['credenciales'] = $credencialesValidas;
         }
 
         // Imagen
@@ -704,6 +817,8 @@ class SistemaVersionController extends Controller
             'manual_usuario_name' => $validated['manual_usuario_nombre'] ?? null,
             'manual_usuario_size' => $validated['manual_usuario_tamano'] ?? null,
 
+
+
             'data' => [
                 'fecha_lanzamiento' => $validated['fecha_lanzamiento'],
                 'estado' => $validated['estado'],
@@ -711,10 +826,12 @@ class SistemaVersionController extends Controller
                 'tecnologias' => $validated['tecnologias'],
                 'servidores' => $validated['servidores'],
                 'bases_datos' => $validated['bases_datos'],
-                'credenciales' => $validated['credenciales'],
+                'credenciales' => $validated['credenciales'] ?? [],
                 'version_id' => $validated['version_id'] ?? null,
                 'es_actual' => $validated['es_actual'] ?? false,
                 'is_update' => $isUpdate,
+
+                'archivo_bd_nombre' => $validated['archivo_bd_nombre'] ?? null,
 
                 // ✅ DOCUMENTOS ADICIONALES
                 'documentos_adicionales' => $documentosAdicionales,
@@ -815,7 +932,7 @@ class SistemaVersionController extends Controller
             'identifier' => 'required|string',
             'fileName' => 'required|string',
             'upload_id' => 'required|exists:version_uploads,id',
-            'tipo' => 'required|in:manual_tecnico,manual_usuario',
+            'tipo' => 'required|in:manual_tecnico,manual_usuario,archivo_bd',
         ]);
 
         $upload = VersionUpload::findOrFail($request->upload_id);
@@ -865,6 +982,7 @@ class SistemaVersionController extends Controller
             'codigo_identifier' => 'nullable|string', // 👈 Nullable para UPDATE
             'manual_tecnico_identifier' => 'nullable|string', // 👈 Nullable para UPDATE
             'manual_usuario_identifier' => 'nullable|string', // 👈 Nullable para UPDATE
+            'archivo_bd_identifier' => 'nullable|string',
         ]);
 
         $upload = VersionUpload::findOrFail($request->upload_id);
@@ -904,11 +1022,21 @@ class SistemaVersionController extends Controller
             }
         }
 
+        if ($request->archivo_bd_identifier) {
+            if ($upload->archivo_bd_chunks_received !== $upload->archivo_bd_total_chunks) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Archivo BD incompleto: {$upload->archivo_bd_chunks_received}/{$upload->archivo_bd_total_chunks}"
+                ], 400);
+            }
+        }
+
         // Actualizar identifiers
         $upload->update([
             'chunk_identifier' => $request->codigo_identifier,
             'manual_tecnico_identifier' => $request->manual_tecnico_identifier,
             'manual_usuario_identifier' => $request->manual_usuario_identifier,
+            'archivo_bd_identifier' => $request->archivo_bd_identifier,
             'estado' => 'procesando',
             'progreso' => 5,
         ]);

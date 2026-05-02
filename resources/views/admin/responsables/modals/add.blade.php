@@ -1,5 +1,6 @@
 <!-- Modal Agregar Responsable -->
-<div class="modal fade" id="addResponsableModal" tabindex="-1" aria-labelledby="addResponsableModalLabel" aria-hidden="true">
+<div class="modal fade" id="addResponsableModal" tabindex="-1" aria-labelledby="addResponsableModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
 
@@ -24,8 +25,8 @@
                             <label class="form-label fw-semibold">
                                 Nombre <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" name="nombre" 
-                                   placeholder="Ej. Juan Pérez" required>
+                            <input type="text" class="form-control" name="nombre" placeholder="Ej. Juan Pérez"
+                                required>
                             <div class="invalid-feedback">El nombre es obligatorio.</div>
                         </div>
 
@@ -33,18 +34,24 @@
                             <label class="form-label fw-semibold">
                                 Cargo <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" name="cargo" 
-                                   placeholder="Ej. Director" required>
+                            <input type="text" class="form-control" name="cargo" placeholder="Ej. Director"
+                                required>
                             <div class="invalid-feedback">El cargo es obligatorio.</div>
                         </div>
 
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">
-                                Email <span class="text-danger">*</span>
+                                Email <span>(Opcional)</span>
                             </label>
-                            <input type="email" class="form-control" name="email" 
-                                   placeholder="ejemplo@correo.com" required>
-                            <div class="invalid-feedback">El email es obligatorio y debe ser válido.</div>
+                            <input type="email" class="form-control" name="email" placeholder="ejemplo@correo.com">
+                            <div class="invalid-feedback">El email debe ser válido.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Celular <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" name="celular" placeholder="Ej. 77712345" required>
+                            <div class="invalid-feedback">El celular no es válido.</div>
                         </div>
 
                     </div>

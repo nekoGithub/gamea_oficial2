@@ -44,13 +44,13 @@
                                 La sigla es obligatoria.
                             </div>
                         </div>
-
+                        
                         <!-- Celular -->
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">
-                                Celular
-                            </label>
-                            <input type="text" class="form-control" name="celular" placeholder="70000000">
+                            <label class="form-label fw-semibold">Teléfono</label>
+                            <input type="text" class="form-control" id="celular" name="celular"
+                                placeholder="Ej. 75123456" maxlength="8" inputmode="numeric">
+                            <div class="invalid-feedback">El teléfono debe tener 8 dígitos numéricos.</div>                            
                         </div>
 
                         <!-- Descripción -->
@@ -68,12 +68,14 @@
                             </label>
 
                             <div class="btn-group w-100" role="group" aria-label="Estado">
-                                <input type="radio" class="btn-check" name="estado" id="estado-activa" value="activa">
+                                <input type="radio" class="btn-check" name="estado" id="estado-activa"
+                                    value="activa">
                                 <label class="btn btn-outline-success" for="estado-activa">
                                     <i class="ti ti-check me-1"></i> Activa
                                 </label>
 
-                                <input type="radio" class="btn-check" name="estado" id="estado-inactiva" value="inactiva">
+                                <input type="radio" class="btn-check" name="estado" id="estado-inactiva"
+                                    value="inactiva">
                                 <label class="btn btn-outline-secondary" for="estado-inactiva">
                                     <i class="ti ti-ban me-1"></i> Inactiva
                                 </label>
@@ -88,11 +90,11 @@
                         <!-- Responsables -->
                         <div class="col-md-8">
                             <label class="form-label fw-semibold">
-                                Responsables <span class="text-danger">*</span>
+                                Responsables <span>(Opcional)</span>
                             </label>
 
                             <select name="responsables[]" multiple class="form-control js-tom-select"
-                                placeholder="Seleccione responsables" data-required="true">
+                                placeholder="Seleccione responsables" >
                                 @foreach ($responsables as $responsable)
                                     <option value="{{ $responsable->id }}">
                                         {{ $responsable->nombre }} – {{ $responsable->cargo }}
@@ -101,12 +103,9 @@
                             </select>
 
                             <small class="text-muted">
-                                Debe seleccionar al menos un responsable.
+                                Este campo es opcional.
                             </small>
-
-                            <div class="invalid-feedback d-block d-none" id="responsables-error">
-                                Este campo es obligatorio.
-                            </div>
+                            
                         </div>
 
                     </div>

@@ -20,6 +20,7 @@ class SistemaVersion extends Model
         'codigo_fuente',
         'manual_tecnico',
         'manual_usuario',
+        'archivo_bd',
         'fecha_lanzamiento',
         'publicado_por',
         'estado',

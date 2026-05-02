@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 
 class BaseDatoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.bases-datos.index')->only('index');
+        $this->middleware('can:admin.bases-datos.store')->only('store');
+        $this->middleware('can:admin.bases-datos.edit')->only('edit');
+        $this->middleware('can:admin.bases-datos.update')->only('update');
+        $this->middleware('can:admin.bases-datos.destroy')->only('destroy');
+        $this->middleware('can:admin.bases-datos.restore')->only('restore');
+    }
     public function index()
     {
         $basesDatos = BaseDato::orderBy('id', 'desc')->get();
@@ -26,15 +35,15 @@ class BaseDatoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'gestor' => 'required|string|max:100',
-            'version' => 'required|string|max:50',
+            'gestor' => 'required|string|max:45',
+            'version' => 'required|string|max:10',
             'descripcion' => 'nullable|string|max:1000',
             'estado' => 'required|in:activo,inactivo',
         ], [
             'gestor.required' => 'El gestor es obligatorio.',
-            'gestor.max' => 'El gestor no puede exceder 100 caracteres.',
+            'gestor.max' => 'El gestor no puede exceder 45 caracteres.',
             'version.required' => 'La versión es obligatoria.',
-            'version.max' => 'La versión no puede exceder 50 caracteres.',
+            'version.max' => 'La versión no puede exceder 10 caracteres.',
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres.',
             'estado.required' => 'El estado es obligatorio.',
             'estado.in' => 'El estado debe ser activo o inactivo.',
@@ -64,15 +73,15 @@ class BaseDatoController extends Controller
     public function update(Request $request, BaseDato $basesDato)
     {
         $validated = $request->validate([
-            'gestor' => 'required|string|max:100',
-            'version' => 'required|string|max:50',
+            'gestor' => 'required|string|max:45',
+            'version' => 'required|string|max:10',
             'descripcion' => 'nullable|string|max:1000',
             'estado' => 'required|in:activo,inactivo',
         ], [
             'gestor.required' => 'El gestor es obligatorio.',
-            'gestor.max' => 'El gestor no puede exceder 100 caracteres.',
+            'gestor.max' => 'El gestor no puede exceder 45 caracteres.',
             'version.required' => 'La versión es obligatoria.',
-            'version.max' => 'La versión no puede exceder 50 caracteres.',
+            'version.max' => 'La versión no puede exceder 10 caracteres.',
             'descripcion.max' => 'La descripción no puede exceder 1000 caracteres.',
             'estado.required' => 'El estado es obligatorio.',
             'estado.in' => 'El estado debe ser activo o inactivo.',

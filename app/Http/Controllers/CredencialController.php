@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Credencial;
+use App\Models\Sistema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Crypt;
@@ -10,177 +11,213 @@ use Illuminate\Support\Facades\Auth;
 
 class CredencialController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.credenciales.index')->only('index');
+        $this->middleware('can:admin.credenciales.store')->only('store');
+        $this->middleware('can:admin.credenciales.show')->only('verPassword');
+        $this->middleware('can:admin.credenciales.edit')->only('edit');
+        $this->middleware('can:admin.credenciales.update')->only('update');
+        $this->middleware('can:admin.credenciales.destroy')->only('destroy');
+        $this->middleware('can:admin.credenciales.restore')->only('restore');
+    }
+
     public function index()
     {
-        $credenciales = Credencial::orderBy('id', 'desc')->get();
-        $credencialesEliminadas = Credencial::onlyTrashed()
-            ->orderBy('deleted_at', 'desc')
-            ->get();
+        $credenciales = Credencial::with('sistema')->orderBy('id', 'desc')->get();
+        $credencialesEliminadas = Credencial::with('sistema')->onlyTrashed()->orderBy('deleted_at', 'desc')->get();
+        $sistemas = Sistema::where('estado', 'activo')->whereNull('deleted_at')->orderBy('nombre')->get();
 
         return view('admin.credenciales.index', compact(
             'credenciales',
-            'credencialesEliminadas'
+            'credencialesEliminadas',
+            'sistemas'
         ));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Buscar sistemas por dominio o sigla (para el autocomplete AJAX)
+     */
+    public function buscarSistema(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        /* $sistemas = Sistema::where(function ($q) use ($query) {
+            $q->where('nombre', 'like', "%{$query}%")
+                ->orWhere('url', 'like', "%{$query}%"); */
+        $sistemas = Sistema::where(function ($q) use ($query) {
+            $q->where('dominio', 'like', "%{$query}%")
+                ->orWhere('sigla', 'like', "%{$query}%");
+        })
+            ->where('estado', 'activo')
+            ->whereNull('deleted_at')
+            ->select('id', 'dominio', 'sigla')
+            ->limit(10)
+            ->get()
+            ->map(fn($s) => [
+                'id'    => $s->id,
+                'texto' => $s->nombre . ($s->url ? ' — ' . $s->sigla : ''),
+                'nombre' => $s->nombre,
+                'dominio'   => $s->url ?? '',
+            ]);
+
+        return response()->json($sistemas);
+    }
+
+    /**
+     * Store
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'usuario' => 'required|string|max:150',
-            'password' => 'required|string|min:6',
-            'url_acceso' => 'required|url|max:255',
-            'estado' => 'required|in:activo,inactivo',
+            'sistema_id' => 'required|exists:sistemas,id',
+            'usuario'    => 'required|string|max:150',
+            'password'   => 'required|string|min:6|max:20',
+            'estado'     => 'required|in:activo,inactivo',
         ], [
-            'usuario.required' => 'El usuario es obligatorio.',
-            'usuario.max' => 'El usuario no puede exceder 150 caracteres.',
-            'password.required' => 'La contraseña es obligatoria.',
-            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
-            'url_acceso.required' => 'La URL de acceso es obligatoria.',
-            'url_acceso.url' => 'La URL debe ser válida.',
-            'url_acceso.max' => 'La URL no puede exceder 255 caracteres.',
-            'estado.required' => 'El estado es obligatorio.',
-            'estado.in' => 'El estado debe ser activo o inactivo.',
+            'sistema_id.required' => 'Debes seleccionar un sistema.',
+            'sistema_id.exists'   => 'El sistema seleccionado no es válido.',
+            'usuario.required'    => 'El usuario es obligatorio.',
+            'usuario.max'         => 'El usuario no puede exceder 150 caracteres.',
+            'password.required'   => 'La contraseña es obligatoria.',
+            'password.min'        => 'La contraseña debe tener al menos 6 caracteres.',
+            'password.max'        => 'La contraseña no puede exceder 20 caracteres.',
+            'estado.required'     => 'El estado es obligatorio.',
+            'estado.in'           => 'El estado debe ser activo o inactivo.',
         ]);
 
-        // Encriptar la contraseña
         $validated['password_encrypted'] = Crypt::encryptString($validated['password']);
         unset($validated['password']);
 
         $credencial = Credencial::create($validated);
 
         return response()->json([
-            'success' => true,
-            'credencial' => $credencial
+            'success'    => true,
+            'credencial' => $credencial->load('sistema'),
         ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Edit
      */
     public function edit(Credencial $credenciale)
     {
-        // No devolvemos la contraseña por seguridad
         return response()->json([
-            'credencial' => $credenciale->only(['id', 'usuario', 'url_acceso', 'estado'])
+            'credencial' => [
+                'id'         => $credenciale->id,
+                'sistema_id' => $credenciale->sistema_id,
+                'sistema_texto' => $credenciale->sistema
+                    ? $credenciale->sistema->nombre . ($credenciale->sistema->url ? ' — ' . $credenciale->sistema->url : '')
+                    : '',
+                'usuario'    => $credenciale->usuario,
+                'estado'     => $credenciale->estado,
+            ]
         ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update
      */
     public function update(Request $request, Credencial $credenciale)
     {
         $validated = $request->validate([
-            'usuario' => 'required|string|max:150',
-            'password' => 'nullable|string|min:6',
-            'url_acceso' => 'required|url|max:255',
-            'estado' => 'required|in:activo,inactivo',
+            'sistema_id'       => 'required|exists:sistemas,id',
+            'usuario'          => 'required|string|max:150',
+            'password'         => 'nullable|string|min:6|max:20',
+            'estado'           => 'required|in:activo,inactivo',
             'current_password' => 'required|string',
         ], [
-            'usuario.required' => 'El usuario es obligatorio.',
-            'usuario.max' => 'El usuario no puede exceder 150 caracteres.',
-            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
-            'url_acceso.required' => 'La URL de acceso es obligatoria.',
-            'url_acceso.url' => 'La URL debe ser válida.',
-            'url_acceso.max' => 'La URL no puede exceder 255 caracteres.',
-            'estado.required' => 'El estado es obligatorio.',
-            'estado.in' => 'El estado debe ser activo o inactivo.',
+            'sistema_id.required'       => 'Debes seleccionar un sistema.',
+            'sistema_id.exists'         => 'El sistema seleccionado no es válido.',
+            'usuario.required'          => 'El usuario es obligatorio.',
+            'usuario.max'               => 'El usuario no puede exceder 150 caracteres.',
+            'password.min'              => 'La contraseña debe tener al menos 6 caracteres.',
+            'password.max'              => 'La contraseña no puede exceder 20 caracteres.',
+            'estado.required'           => 'El estado es obligatorio.',
+            'estado.in'                 => 'El estado debe ser activo o inactivo.',
             'current_password.required' => 'Debes ingresar tu contraseña para actualizar.',
         ]);
 
-        // Verificar bloqueo por intentos fallidos
-        $lockKey = 'credencial_update_lock_' . Auth::id();
+        // Bloqueo por intentos
+        $lockKey     = 'credencial_update_lock_' . Auth::id();
         $attemptsKey = 'credencial_update_attempts_' . Auth::id();
 
         if (cache()->has($lockKey)) {
             $remainingTime = cache()->get($lockKey) - now()->timestamp;
             return response()->json([
-                'success' => false,
-                'locked' => true,
-                'message' => 'Has excedido el número de intentos. Intenta nuevamente en ' . ceil($remainingTime / 60) . ' minutos.',
+                'success'          => false,
+                'locked'           => true,
+                'message'          => 'Has excedido el número de intentos. Intenta nuevamente en ' . ceil($remainingTime / 60) . ' minutos.',
                 'remaining_seconds' => $remainingTime
             ], 429);
         }
 
-        // Verificar contraseña actual
         if (!Hash::check($validated['current_password'], Auth::user()->password)) {
             $attempts = cache()->get($attemptsKey, 0) + 1;
             cache()->put($attemptsKey, $attempts, now()->addMinutes(15));
 
             if ($attempts >= 3) {
-                // Bloquear por 15 minutos
                 cache()->put($lockKey, now()->addMinutes(15)->timestamp, now()->addMinutes(15));
                 cache()->forget($attemptsKey);
-
-                // Desloguear al usuario
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
                 return response()->json([
                     'success' => false,
-                    'locked' => true,
-                    'logout' => true,
-                    'message' => 'Has excedido el número de intentos permitidos. Tu sesión ha sido cerrada por seguridad.',
+                    'locked'  => true,
+                    'logout'  => true,
+                    'message' => 'Has excedido el número de intentos. Tu sesión ha sido cerrada por seguridad.',
                 ], 429);
             }
 
             return response()->json([
-                'success' => false,
-                'message' => 'La contraseña es incorrecta.',
+                'success'           => false,
+                'message'           => 'La contraseña es incorrecta.',
                 'attempts_remaining' => 3 - $attempts
             ], 401);
         }
 
-        // Contraseña correcta, limpiar intentos
         cache()->forget($attemptsKey);
 
-        // Si se proporciona nueva contraseña, encriptarla
         if (!empty($validated['password'])) {
             $validated['password_encrypted'] = Crypt::encryptString($validated['password']);
         }
-        unset($validated['password']);
-        unset($validated['current_password']);
+        unset($validated['password'], $validated['current_password']);
 
         $credenciale->update($validated);
 
         return response()->json([
-            'success' => true,
-            'credencial' => $credenciale->fresh()
+            'success'    => true,
+            'credencial' => $credenciale->fresh()->load('sistema'),
         ]);
     }
 
     /**
-     * Remove the specified resource from storage (soft delete).
+     * Destroy (soft delete)
      */
     public function destroy(Credencial $credenciale)
     {
         $credenciale->delete();
-
-        return response()->json([
-            'success' => true
-        ]);
+        return response()->json(['success' => true]);
     }
 
     /**
-     * Restore the specified resource from trash.
+     * Restore
      */
     public function restore($id)
     {
         $credencial = Credencial::onlyTrashed()->findOrFail($id);
         $credencial->restore();
-
-        return response()->json([
-            'success' => true,
-            'credencial' => $credencial
-        ]);
+        return response()->json(['success' => true, 'credencial' => $credencial]);
     }
 
     /**
-     * Verificar contraseña del usuario actual y revelar credencial
+     * Ver contraseña desencriptada
      */
     public function verPassword(Request $request, Credencial $credenciale)
     {
@@ -190,66 +227,52 @@ class CredencialController extends Controller
             'current_password.required' => 'Debes ingresar tu contraseña.'
         ]);
 
-        // Verificar bloqueo por intentos fallidos
-        $lockKey = 'credencial_view_lock_' . Auth::id();
+        $lockKey     = 'credencial_view_lock_' . Auth::id();
         $attemptsKey = 'credencial_view_attempts_' . Auth::id();
 
         if (cache()->has($lockKey)) {
             $remainingTime = cache()->get($lockKey) - now()->timestamp;
             return response()->json([
-                'success' => false,
-                'locked' => true,
-                'message' => 'Has excedido el número de intentos. Intenta nuevamente en ' . ceil($remainingTime / 60) . ' minutos.',
+                'success'          => false,
+                'locked'           => true,
+                'message'          => 'Has excedido el número de intentos. Intenta nuevamente en ' . ceil($remainingTime / 60) . ' minutos.',
                 'remaining_seconds' => $remainingTime
             ], 429);
         }
 
-        // Verificar que la contraseña ingresada coincida con la del usuario logueado
         if (!Hash::check($request->current_password, Auth::user()->password)) {
             $attempts = cache()->get($attemptsKey, 0) + 1;
             cache()->put($attemptsKey, $attempts, now()->addMinutes(15));
 
             if ($attempts >= 3) {
-                // Bloquear por 15 minutos
                 cache()->put($lockKey, now()->addMinutes(15)->timestamp, now()->addMinutes(15));
                 cache()->forget($attemptsKey);
-
-                // Desloguear al usuario
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
                 return response()->json([
                     'success' => false,
-                    'locked' => true,
-                    'logout' => true,
-                    'message' => 'Has excedido el número de intentos permitidos. Tu sesión ha sido cerrada por seguridad.',
+                    'locked'  => true,
+                    'logout'  => true,
+                    'message' => 'Has excedido el número de intentos. Tu sesión ha sido cerrada por seguridad.',
                 ], 429);
             }
 
             return response()->json([
-                'success' => false,
-                'message' => 'La contraseña es incorrecta.',
+                'success'           => false,
+                'message'           => 'La contraseña es incorrecta.',
                 'attempts_remaining' => 3 - $attempts
             ], 401);
         }
 
-        // Contraseña correcta, limpiar intentos
         cache()->forget($attemptsKey);
 
-        // Desencriptar y devolver la contraseña
         try {
             $passwordDesencriptado = Crypt::decryptString($credenciale->password_encrypted);
-
-            return response()->json([
-                'success' => true,
-                'password' => $passwordDesencriptado
-            ]);
+            return response()->json(['success' => true, 'password' => $passwordDesencriptado]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al desencriptar la contraseña.'
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Error al desencriptar la contraseña.'], 500);
         }
     }
 }

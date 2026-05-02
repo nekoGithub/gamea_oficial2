@@ -31,7 +31,8 @@
                             </label>
                             <input type="email" class="form-control" id="email" name="email"
                                 placeholder="Ej. juan@example.com" required>
-                            <div class="invalid-feedback">Por favor ingresa un correo válido</div>
+                            {{-- ✅ id para poder mostrar el error de duplicado --}}
+                            <div class="invalid-feedback" id="emailFeedback">Por favor ingresa un correo válido</div>
                         </div>
 
                         <!-- Contraseña con ojito -->
@@ -46,7 +47,8 @@
                                     <i class="ti ti-eye" id="togglePasswordIcon"></i>
                                 </button>
                             </div>
-                            <div class="invalid-feedback d-block">La contraseña es obligatoria</div>
+                            {{-- ✅ Quitado d-block para que no aparezca siempre --}}
+                            <div class="invalid-feedback">La contraseña no cumple los requisitos</div>
 
                             <!-- Requisitos de contraseña -->
                             <div class="mt-2">
@@ -144,7 +146,7 @@
     </div>
 </div>
 
-<!-- Modal de Progreso -->
+<!-- Modal de Progreso (sin cambios) -->
 <div class="modal fade" id="progressModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -157,15 +159,12 @@
                 <h5 class="mb-3" id="progressTitle">Guardando usuario...</h5>
                 <p class="text-muted mb-3" id="progressMessage">Por favor espera mientras procesamos la información
                 </p>
-
-                <!-- Barra de progreso -->
                 <div class="progress" style="height: 25px;">
                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar"
                         id="progressBar" style="width: 0%">
                         <span id="progressPercent">0%</span>
                     </div>
                 </div>
-
                 <small class="text-muted d-block mt-2" id="progressStep">Validando datos...</small>
             </div>
         </div>
@@ -334,7 +333,6 @@
             togglePassword.addEventListener('click', function() {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
-
                 if (type === 'text') {
                     toggleIcon.classList.remove('ti-eye');
                     toggleIcon.classList.add('ti-eye-off');
@@ -359,28 +357,22 @@
                 alert('La imagen no debe superar 2MB');
                 return false;
             }
-
             const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
             if (!validTypes.includes(file.type)) {
                 alert('Solo se permiten imágenes PNG, JPG o GIF');
                 return false;
             }
-
             const reader = new FileReader();
             reader.onload = function(event) {
                 avatarImage.src = event.target.result;
                 removeAvatarBtn.classList.remove('d-none');
             };
             reader.readAsDataURL(file);
-
             return true;
         }
 
         avatarInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                processAvatarFile(file);
-            }
+            if (e.target.files[0]) processAvatarFile(e.target.files[0]);
         });
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -391,23 +383,12 @@
             e.preventDefault();
             e.stopPropagation();
         }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            avatarPreview.addEventListener(eventName, function() {
-                avatarPreview.classList.add('dragging');
-            });
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            avatarPreview.addEventListener(eventName, function() {
-                avatarPreview.classList.remove('dragging');
-            });
-        });
-
+        ['dragenter', 'dragover'].forEach(ev => avatarPreview.addEventListener(ev, () => avatarPreview.classList
+            .add('dragging')));
+        ['dragleave', 'drop'].forEach(ev => avatarPreview.addEventListener(ev, () => avatarPreview.classList
+            .remove('dragging')));
         avatarPreview.addEventListener('drop', function(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-
+            const files = e.dataTransfer.files;
             if (files.length > 0) {
                 const file = files[0];
                 const dataTransfer = new DataTransfer();
@@ -427,41 +408,14 @@
         if (passwordInput) {
             passwordInput.addEventListener('input', function() {
                 const password = this.value;
-
-                const lengthReq = document.getElementById('req-length');
-                if (password.length >= 8) {
-                    lengthReq.classList.add('valid');
-                } else {
-                    lengthReq.classList.remove('valid');
-                }
-
-                const uppercaseReq = document.getElementById('req-uppercase');
-                if (/[A-Z]/.test(password)) {
-                    uppercaseReq.classList.add('valid');
-                } else {
-                    uppercaseReq.classList.remove('valid');
-                }
-
-                const lowercaseReq = document.getElementById('req-lowercase');
-                if (/[a-z]/.test(password)) {
-                    lowercaseReq.classList.add('valid');
-                } else {
-                    lowercaseReq.classList.remove('valid');
-                }
-
-                const numberReq = document.getElementById('req-number');
-                if (/[0-9]/.test(password)) {
-                    numberReq.classList.add('valid');
-                } else {
-                    numberReq.classList.remove('valid');
-                }
-
-                const specialReq = document.getElementById('req-special');
-                if (/[@$!%*?&]/.test(password)) {
-                    specialReq.classList.add('valid');
-                } else {
-                    specialReq.classList.remove('valid');
-                }
+                document.getElementById('req-length').classList.toggle('valid', password.length >= 8);
+                document.getElementById('req-uppercase').classList.toggle('valid', /[A-Z]/.test(
+                    password));
+                document.getElementById('req-lowercase').classList.toggle('valid', /[a-z]/.test(
+                    password));
+                document.getElementById('req-number').classList.toggle('valid', /[0-9]/.test(password));
+                document.getElementById('req-special').classList.toggle('valid', /[@$!%*?&]/.test(
+                    password));
             });
         }
 
@@ -470,9 +424,7 @@
             checkbox.addEventListener('change', function() {
                 if (this.checked) {
                     roleCheckboxes.forEach(cb => {
-                        if (cb !== this) {
-                            cb.checked = false;
-                        }
+                        if (cb !== this) cb.checked = false;
                     });
                     document.getElementById('roleError').classList.add('d-none');
                 }
@@ -486,24 +438,22 @@
                 const parent = this.closest('.col-md-6, .col-12');
                 if (parent) {
                     const feedback = parent.querySelector('.invalid-feedback');
-                    if (feedback) {
-                        feedback.style.display = 'none';
-                    }
+                    if (feedback) feedback.style.display = 'none';
                 }
             });
         });
 
-        // ========== SUBMIT CON VALIDACIÓN ==========
+        // ── SUBMIT ─────────────────────────────────────────────────────────────
         const addUserForm = document.getElementById('addUserForm');
         const progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
         const addUserModalEl = document.getElementById('addUserModal');
         const addUserModalInstance = bootstrap.Modal.getInstance(addUserModalEl) || new bootstrap.Modal(
             addUserModalEl);
 
-        addUserForm.addEventListener('submit', function(e) {
+        // ✅ CAMBIO 1: async para poder usar await dentro
+        addUserForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // ========== VALIDAR CAMPOS ==========
             let isValid = true;
             const nameInput = document.getElementById('name');
             const emailInput = document.getElementById('email');
@@ -515,44 +465,64 @@
                 isValid = false;
             }
 
-            // Validar email
+            // Validar email formato
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailInput.value.trim() || !emailRegex.test(emailInput.value)) {
                 emailInput.classList.add('is-invalid');
-                emailInput.nextElementSibling.style.display = 'block';
+                document.getElementById('emailFeedback').textContent =
+                    'Por favor ingresa un correo válido';
+                document.getElementById('emailFeedback').style.display = 'block';
                 isValid = false;
             }
 
-            // Validar contraseña
+            // Validar contraseña (inline, sin Swal)
             const password = passwordInput.value;
             if (!password || password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(
-                password) || !/[0-9]/.test(password) || !/[@$!%*?&]/.test(password)) {
+                    password) ||
+                !/[0-9]/.test(password) || !/[@$!%*?&]/.test(password)) {
                 passwordInput.classList.add('is-invalid');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Contraseña inválida',
-                    text: 'La contraseña debe cumplir todos los requisitos indicados',
-                    confirmButtonColor: '#5156be'
-                });
                 isValid = false;
             }
 
-            // Validar rol
+            // Validar rol (inline, sin Swal)
             const roleSelected = Array.from(roleCheckboxes).some(cb => cb.checked);
             if (!roleSelected) {
                 document.getElementById('roleError').classList.remove('d-none');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Rol requerido',
-                    text: 'Debes seleccionar un rol para el usuario',
-                    confirmButtonColor: '#5156be'
-                });
                 isValid = false;
             }
 
-            if (!isValid) return;
+            // ✅ CAMBIO 2: verificar email duplicado ANTES de la animación
+            if (isValid && emailInput.value.trim()) {
+                try {
+                    const checkRes = await fetch('{{ route('admin.users.checkEmail') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector(
+                                'meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: emailInput.value.trim()
+                        })
+                    });
+                    const checkData = await checkRes.json();
+                    if (checkData.exists) {
+                        // ✅ CAMBIO 3: error inline en el campo email
+                        emailInput.classList.add('is-invalid');
+                        document.getElementById('emailFeedback').textContent =
+                            'Este correo ya está registrado en el sistema';
+                        document.getElementById('emailFeedback').style.display = 'block';
+                        isValid = false;
+                    }
+                } catch (err) {
+                    // si falla el check, dejamos pasar (el servidor lo atrapará)
+                }
+            }
 
-            // ========== ENVIAR FORMULARIO ==========
+            if (!isValid) return; // se queda en el modal con los errores inline
+
+            // ── A partir de aquí todo igual que antes ─────────────────────────
             addUserModalInstance.hide();
             progressModal.show();
 
@@ -605,7 +575,8 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                        .content,
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 }
@@ -621,7 +592,8 @@
                     Swal.fire({
                         icon: 'success',
                         title: '¡Usuario Creado!',
-                        html: `<p>El usuario <strong>${formData.get('name')}</strong> ha sido registrado.</p><p class="text-muted mb-0">Se envió un correo a <strong>${formData.get('email')}</strong></p>`,
+                        html: `<p>El usuario <strong>${formData.get('name')}</strong> ha sido registrado.</p>
+                               <p class="text-muted mb-0">Se envió un correo a <strong>${formData.get('email')}</strong></p>`,
                         confirmButtonText: 'Entendido',
                         confirmButtonColor: '#5156be',
                         timer: 3000,
@@ -631,7 +603,7 @@
             }, 5000);
         });
 
-        // Limpiar modal
+        // Limpiar modal (sin cambios)
         if (addUserModalEl) {
             addUserModalEl.addEventListener('hidden.bs.modal', function() {
                 addUserForm.reset();

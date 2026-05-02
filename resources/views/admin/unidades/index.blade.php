@@ -33,10 +33,12 @@
 
                         <div class="card-header border-light justify-content-between">
                             <h4 class="card-title mb-0">Unidades Activas</h4>
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUnidadModal"
-                                href="#">
-                                <i class="ti ti-plus me-1"></i> Agregar Unidad
-                            </a>
+                            @can('admin.unidades.store')
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUnidadModal"
+                                    href="#">
+                                    <i class="ti ti-plus me-1"></i> Agregar Unidad
+                                </a>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -47,7 +49,7 @@
                                             <th>Nro</th>
                                             <th>Nombre</th>
                                             <th>Sigla</th>
-                                            <th>Celular</th>
+                                            <th>Teléfono</th>
                                             <th>Responsables</th>
                                             <th>Estado</th>
                                             <th>Fecha creación</th>
@@ -87,7 +89,7 @@
                                                         <i class="ti ti-search"></i>
                                                     </span>
                                                     <input class="form-control form-control-sm bg-light-subtle border-light"
-                                                        placeholder="Celular" type="text" />
+                                                        placeholder="Teléfono" type="text" />
                                                 </div>
                                             </th>
                                             <th>
@@ -127,7 +129,7 @@
                                                 <td>{{ $unidad->id }}</td>
                                                 <td>{{ $unidad->nombre }}</td>
                                                 <td>{{ $unidad->sigla }}</td>
-                                                <td>{{ $unidad->celular ?? '-' }}</td>
+                                                <td>{{ $unidad->celular ? '+591 ' . $unidad->celular : '-' }}</td>
                                                 <td>
                                                     @if ($unidad->responsables->isNotEmpty())
                                                         <div class="d-flex flex-wrap gap-1">
@@ -150,25 +152,24 @@
                                                 <td>{{ $unidad->created_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle edit-unidad-btn"
-                                                            data-id="{{ $unidad->id }}">
-                                                            <i class="ti ti-edit fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle delete-unidad-btn"
-                                                            data-id="{{ $unidad->id }}">
-                                                            <i class="ti ti-trash fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.unidades.edit')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle edit-unidad-btn"
+                                                                data-id="{{ $unidad->id }}">
+                                                                <i class="ti ti-edit fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.unidades.destroy')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle delete-unidad-btn"
+                                                                data-id="{{ $unidad->id }}">
+                                                                <i class="ti ti-trash fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
                                         @empty
-                                            {{-- <tr>
-                                                <td colspan="8" class="text-center text-muted py-3">
-                                                    No hay unidades registradas
-                                                </td>
-                                            </tr> --}}
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -252,20 +253,17 @@
                                                 <td>{{ $unidad->deleted_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle restore-unidad-btn"
-                                                            data-id="{{ $unidad->id }}">
-                                                            <i class="ti ti-rotate fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.unidades.restore')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle restore-unidad-btn"
+                                                                data-id="{{ $unidad->id }}">
+                                                                <i class="ti ti-rotate fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
                                         @empty
-                                            {{-- <tr>
-                                                <td colspan="5" class="text-center text-muted py-3">
-                                                    La papelera está vacía
-                                                </td>
-                                            </tr> --}}
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -289,26 +287,55 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/js/datatables/datatables-unidades.js'])
 
-    <script type="module">
-        import {
-            initTomSelect
-        } from "{{ Vite::asset('resources/js/components/tom-select.js') }}";
+    <script>
+        const canEdit = @json(auth()->user()?->can('admin.unidades.edit') ?? false);
+        const canDestroy = @json(auth()->user()?->can('admin.unidades.destroy') ?? false);
+        const canRestore = @json(auth()->user()?->can('admin.unidades.restore') ?? false);
+    </script>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initTomSelect('.js-tom-select', {
-                placeholder: 'Seleccione responsables'
-            });
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAdd = document.querySelector('#addUnidadForm .js-tom-select');
+            if (selectAdd && !selectAdd.tomselect) {
+                new TomSelect(selectAdd, {
+                    plugins: ['remove_button'],
+                    placeholder: 'Seleccione responsables'
+                });
+            }
         });
 
-        document.getElementById('addUnidadModal')?.addEventListener('shown.bs.modal', () => {
-            initTomSelect('.js-tom-select', {
-                placeholder: 'Seleccione responsables'
-            });
+        document.getElementById('addUnidadModal')?.addEventListener('shown.bs.modal', function() {
+            const selectAdd = document.querySelector('#addUnidadForm .js-tom-select');
+            if (selectAdd && !selectAdd.tomselect) {
+                new TomSelect(selectAdd, {
+                    plugins: ['remove_button'],
+                    placeholder: 'Seleccione responsables'
+                });
+            }
         });
     </script>
 
     <script>
         // ==================== FUNCIONES DE UTILIDAD ====================
+
+        function accionesActivos(id) {
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (canEdit) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-unidad-btn" data-id="${id}"><i class="ti ti-edit fs-lg"></i></a>`;
+            if (canDestroy) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-unidad-btn" data-id="${id}"><i class="ti ti-trash fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
+        }
+
+        function accionesPapelera(id) {
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (canRestore) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-unidad-btn" data-id="${id}"><i class="ti ti-rotate fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
+        }
+
         function refreshDataTables() {
             if (window.unidadesDataTables) {
                 window.unidadesDataTables.refresh();
@@ -323,89 +350,32 @@
             return `
                 <div class="d-flex flex-wrap gap-1">
                     ${responsables.map(r => `
-                                                        <span class="badge bg-soft-primary text-primary">
-                                                            ${r.nombre}
-                                                        </span>
-                                                    `).join('')}
+                            <span class="badge bg-soft-primary text-primary">
+                                ${r.nombre}
+                            </span>
+                        `).join('')}
                 </div>
-            `;
-        }
-
-        function createActivoRow(unidad) {
-            const fecha = new Date(unidad.created_at).toLocaleDateString('es-ES', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            });
-
-            const badgeClass = unidad.estado === 'activa' ? 'bg-success' : 'bg-secondary';
-
-            return `
-                <tr data-id="${unidad.id}">
-                    <td>${unidad.id}</td>
-                    <td>${unidad.nombre}</td>
-                    <td>${unidad.sigla}</td>
-                    <td>${unidad.celular ?? '-'}</td>
-                    <td>${renderResponsables(unidad.responsables)}</td>
-                    <td>
-                        <span class="badge ${badgeClass}">
-                            ${unidad.estado}
-                        </span>
-                    </td>
-                    <td>${fecha}</td>
-                    <td class="text-center">
-                        <div class="d-flex justify-content-center gap-1">
-                            <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-unidad-btn" data-id="${unidad.id}">
-                                <i class="ti ti-edit fs-lg"></i>
-                            </a>
-                            <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-unidad-btn" data-id="${unidad.id}">
-                                <i class="ti ti-trash fs-lg"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }
-
-        function createPapeleraRow(unidad) {
-            const fecha = new Date(unidad.deleted_at).toLocaleDateString('es-ES', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            });
-
-            return `
-                <tr data-id="${unidad.id}">
-                    <td>${unidad.id}</td>
-                    <td>${unidad.nombre}</td>
-                    <td>${unidad.sigla}</td>
-                    <td>${fecha}</td>
-                    <td class="text-center">
-                        <div class="d-flex justify-content-center gap-1">
-                            <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-unidad-btn" data-id="${unidad.id}">
-                                <i class="ti ti-rotate fs-lg"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
             `;
         }
 
         // ==================== LÓGICA PRINCIPAL ====================
         document.addEventListener('DOMContentLoaded', function() {
             const csrf = document.querySelector('meta[name="csrf-token"]').content;
-            const tbodyActivos = document.getElementById('tbody-activos');
-            const tbodyPapelera = document.getElementById('tbody-papelera');
+
+            document.getElementById('celular')?.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '').substring(0, 8);
+            });
+            document.getElementById('editCelular')?.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '').substring(0, 8);
+            });
 
             // ================= AGREGAR UNIDAD =================
             document.getElementById('addUnidadForm')?.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
                 const form = this;
-                const formData = new FormData(form);
                 let hasError = false;
 
-                // Validaciones
                 const nombreInput = form.querySelector('[name="nombre"]');
                 if (!nombreInput.value.trim()) {
                     nombreInput.classList.add('is-invalid');
@@ -422,7 +392,7 @@
                     siglaInput.classList.remove('is-invalid');
                 }
 
-                const select = form.querySelector('[name="responsables[]"]');
+                /* const select = form.querySelector('[name="responsables[]"]');
                 const responsablesError = document.getElementById('responsables-error');
 
                 if (!select.tomselect || select.tomselect.items.length === 0) {
@@ -430,7 +400,7 @@
                     hasError = true;
                 } else {
                     responsablesError.classList.add('d-none');
-                }
+                } */
 
                 const estadoSeleccionado = form.querySelector('input[name="estado"]:checked');
                 const estadoError = document.getElementById('estado-error');
@@ -444,6 +414,7 @@
 
                 if (hasError) return;
 
+                const formData = new FormData(form);
                 try {
                     const res = await fetch(form.action, {
                         method: 'POST',
@@ -460,6 +431,10 @@
                         Object.keys(data.errors).forEach(key => {
                             const input = form.querySelector(`[name="${key}"]`);
                             if (input) input.classList.add('is-invalid');
+                            const feedback = input.nextElementSibling;
+                            if (feedback?.classList.contains('invalid-feedback')) {
+                                feedback.textContent = data.errors[key][0];
+                            }
                         });
                         return;
                     }
@@ -467,31 +442,17 @@
                     bootstrap.Modal.getInstance(document.getElementById('addUnidadModal')).hide();
                     form.reset();
 
-
-
-                    const newRow = createActivoRow(data.unidad);
                     const dt = window.unidadesDataTables.activos;
 
                     dt.row.add([
                         data.unidad.id,
                         data.unidad.nombre,
                         data.unidad.sigla,
-                        data.unidad.celular ?? '-',
+                        data.unidad.celular ? '+591 ' + data.unidad.celular : '-',
                         renderResponsables(data.unidad.responsables),
-                        `<span class="badge ${data.unidad.estado === 'activa' ? 'bg-success' : 'bg-secondary'}">
-                            ${data.unidad.estado}
-                        </span>`,
+                        `<span class="badge ${data.unidad.estado === 'activa' ? 'bg-success' : 'bg-secondary'}">${data.unidad.estado}</span>`,
                         new Date(data.unidad.created_at).toLocaleDateString('es-ES'),
-                        `
-                        <div class="d-flex justify-content-center gap-1">
-                            <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-unidad-btn" data-id="${data.unidad.id}">
-                                <i class="ti ti-edit fs-lg"></i>
-                            </a>
-                            <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-unidad-btn" data-id="${data.unidad.id}">
-                                <i class="ti ti-trash fs-lg"></i>
-                            </a>
-                        </div>
-                        `
+                        accionesActivos(data.unidad.id)
                     ]).draw(false);
 
                     Swal.fire({
@@ -514,10 +475,8 @@
 
                 const form = this;
                 const id = document.getElementById('editUnidadId').value;
-                const formData = new FormData(form);
                 let hasError = false;
 
-                // Validaciones...
                 const nombre = document.getElementById('editNombre');
                 if (!nombre.value.trim()) {
                     nombre.classList.add('is-invalid');
@@ -547,16 +506,17 @@
                 const responsablesSelect = document.getElementById('editResponsables');
                 const responsablesError = document.getElementById('edit-responsables-error');
 
-                if (!responsablesSelect || !responsablesSelect.tomselect || responsablesSelect.tomselect
+                /* if (!responsablesSelect || !responsablesSelect.tomselect || responsablesSelect.tomselect
                     .items.length === 0) {
                     responsablesError.classList.remove('d-none');
                     hasError = true;
                 } else {
                     responsablesError.classList.add('d-none');
-                }
+                } */
 
                 if (hasError) return;
 
+                const formData = new FormData(form);
                 try {
                     const res = await fetch(`/admin/unidades/${id}`, {
                         method: 'POST',
@@ -586,24 +546,12 @@
                         data.unidad.id,
                         data.unidad.nombre,
                         data.unidad.sigla,
-                        data.unidad.celular ?? '-',
+                        data.unidad.celular ? '+591 ' + data.unidad.celular : '-',
                         renderResponsables(data.unidad.responsables),
-                        `<span class="badge ${data.unidad.estado === 'activa' ? 'bg-success' : 'bg-secondary'}">
-                    ${data.unidad.estado}
-                        </span>`,
+                        `<span class="badge ${data.unidad.estado === 'activa' ? 'bg-success' : 'bg-secondary'}">${data.unidad.estado}</span>`,
                         new Date(data.unidad.created_at).toLocaleDateString('es-ES'),
-                        `
-                        <div class="d-flex justify-content-center gap-1">
-                            <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-unidad-btn" data-id="${data.unidad.id}">
-                                <i class="ti ti-edit fs-lg"></i>
-                            </a>
-                            <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-unidad-btn" data-id="${data.unidad.id}">
-                                <i class="ti ti-trash fs-lg"></i>
-                            </a>
-                        </div>
-                        `
+                        accionesActivos(data.unidad.id)
                     ]).draw(false);
-
 
                     Swal.fire({
                         toast: true,
@@ -637,7 +585,7 @@
                         document.getElementById('editSigla').value = data.unidad.sigla;
                         document.getElementById('editCelular').value = data.unidad.celular ?? '';
                         document.getElementById('editDescripcion').value = data.unidad.descripcion ??
-                            '';
+                        '';
 
                         document.getElementById('editEstadoActiva').checked = data.unidad.estado ===
                             'activa';
@@ -702,25 +650,16 @@
                                 return;
                             }
 
-                            //  Obtener datos antes de eliminar
                             const rowData = dtActivos.row(`#unidad-${id}`).data();
 
-                            //  Eliminar de ACTIVOS
                             dtActivos.row(`#unidad-${id}`).remove().draw(false);
 
-                            //  Agregar a PAPELERA
                             dtPapelera.row.add([
-                                rowData[0], // id
-                                rowData[1], // nombre
-                                rowData[2], // sigla
+                                rowData[0],
+                                rowData[1],
+                                rowData[2],
                                 new Date().toLocaleDateString('es-ES'),
-                                `
-                                <div class="d-flex justify-content-center gap-1">
-                                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-unidad-btn" data-id="${id}">
-                                        <i class="ti ti-rotate fs-lg"></i>
-                                    </a>
-                                </div>
-                                `
+                                accionesPapelera(id)
                             ]).draw(false);
 
                             Swal.fire({
@@ -739,7 +678,6 @@
 
                     return;
                 }
-
 
                 // ================= RESTAURAR =================
                 const restoreBtn = e.target.closest('.restore-unidad-btn');
@@ -776,29 +714,19 @@
                                 return;
                             }
 
-                            // 🔹 Eliminar de PAPELERA
                             dtPapelera.row(`#unidad-${id}`).remove().draw(false);
 
-                            // 🔹 Agregar nuevamente a ACTIVOS
                             dtActivos.row.add([
                                 data.unidad.id,
                                 data.unidad.nombre,
                                 data.unidad.sigla,
-                                data.unidad.celular ?? '-',
+                                data.unidad.celular ? '+591 ' + data.unidad
+                                .celular : '-',
                                 renderResponsables(data.unidad.responsables),
                                 `<span class="badge bg-success">activa</span>`,
                                 new Date(data.unidad.created_at).toLocaleDateString(
                                     'es-ES'),
-                                `
-                            <div class="d-flex justify-content-center gap-1">
-                                <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-unidad-btn" data-id="${data.unidad.id}">
-                                    <i class="ti ti-edit fs-lg"></i>
-                                </a>
-                                <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-unidad-btn" data-id="${data.unidad.id}">
-                                    <i class="ti ti-trash fs-lg"></i>
-                                </a>
-                            </div>
-                            `
+                                accionesActivos(data.unidad.id)
                             ]).draw(false);
 
                             Swal.fire({
@@ -825,7 +753,6 @@
                 const form = document.getElementById('addUnidadForm');
                 if (!form) return;
 
-                // Marcar "activa" por defecto si ningún radio está seleccionado
                 const estadoChecked = form.querySelector('input[name="estado"]:checked');
                 if (!estadoChecked) {
                     const estadoActivaRadio = form.querySelector('input[name="estado"][value="activa"]');
@@ -837,20 +764,14 @@
 
             // ================= LIMPIAR MODAL AL CERRAR =================
             document.getElementById('addUnidadModal')?.addEventListener('hidden.bs.modal', function() {
-
                 const form = document.getElementById('addUnidadForm');
                 if (!form) return;
 
                 form.reset();
-
-
                 form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-
                 document.getElementById('responsables-error')?.classList.add('d-none');
                 document.getElementById('estado-error')?.classList.add('d-none');
-
                 form.querySelectorAll('input[name="estado"]').forEach(radio => radio.checked = false);
-
                 form.querySelectorAll('.js-tom-select').forEach(select => {
                     if (select.tomselect) {
                         select.tomselect.clear();

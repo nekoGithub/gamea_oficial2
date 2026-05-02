@@ -55,19 +55,17 @@
 
                         <!-- Fecha Lanzamiento -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Fecha de Lanzamiento
-                            </label>
-                            <input type="date" class="form-control" name="fecha_lanzamiento">
-                            <div class="invalid-feedback">Debe ingresar una fecha válida.</div>
+                            <label class="form-label fw-semibold">Fecha de Lanzamiento</label>
+                            <input type="date" class="form-control" name="fecha_lanzamiento" id="addFechaLanzamiento"
+                                min="2015-01-01">
+                            <div class="invalid-feedback">Fecha inválida (2015 - año actual +5).</div>
                         </div>
 
                         <!-- Fecha Fin Soporte -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Fecha Fin de Soporte
-                            </label>
-                            <input type="date" class="form-control" name="fecha_fin_soporte">
+                            <label class="form-label fw-semibold">Fecha Fin de Soporte</label>
+                            <input type="date" class="form-control" name="fecha_fin_soporte" id="addFechaFinSoporte"
+                                min="2015-01-01">
                             <div class="invalid-feedback">La fecha debe ser posterior a la de lanzamiento.</div>
                         </div>
 
@@ -115,7 +113,8 @@
                                     <i class="ti ti-browser me-1"></i> Frontend
                                 </label>
 
-                                <input type="radio" class="btn-check" name="tipo" id="tipo-otros" value="otros/librerias">
+                                <input type="radio" class="btn-check" name="tipo" id="tipo-otros"
+                                    value="otros/librerias">
                                 <label class="btn btn-outline-warning" for="tipo-otros">
                                     <i class="ti ti-puzzle me-1"></i> Otros/Librerias
                                 </label>

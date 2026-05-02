@@ -14,7 +14,7 @@ class AuditoriaSeeder extends Seeder
     public function run(): void
     {
         Auditoria::factory()
-            ->count(1000)
+            ->count(2000)
             ->create();
     }
 }

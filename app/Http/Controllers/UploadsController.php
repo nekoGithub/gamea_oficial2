@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\Storage;
 class UploadsController extends Controller
 {
 
+    public function __construct()
+    {
+        $this->middleware('can:admin.uploads.index')->only('index');
+        $this->middleware('can:admin.uploads.show')->only(['show', 'chunksStatus', 'validarArchivo']);
+        $this->middleware('can:admin.uploads.destroy')->only(['destroy', 'cancelar']);
+    }
     /**
      * Mostrar lista de uploads del usuario
      */
@@ -214,127 +220,155 @@ class UploadsController extends Controller
      */
     public function chunksStatus(VersionUpload $upload)
     {
-        // Verificar que sea del usuario actual
         if ($upload->user_id !== Auth::id()) {
-            return response()->json([
-                'error' => 'No autorizado'
-            ], 403);
+            return response()->json(['error' => 'No autorizado'], 403);
         }
 
         $archivos = [];
 
         // ========== CÓDIGO FUENTE ==========
         if ($upload->chunk_identifier && $upload->file_name) {
-            $chunkDir = storage_path("app/chunks/{$upload->chunk_identifier}");
+            $chunkDir        = storage_path("app/chunks/{$upload->chunk_identifier}");
             $completedChunks = [];
             $directorioExiste = is_dir($chunkDir);
 
             if ($directorioExiste) {
-                $files = glob("{$chunkDir}/chunk_*");
-                foreach ($files as $file) {
+                foreach (glob("{$chunkDir}/chunk_*") as $file) {
                     if (preg_match('/chunk_(\d+)$/', $file, $matches)) {
-                        $completedChunks[] = (int)$matches[1];
+                        $completedChunks[] = (int) $matches[1];
                     }
                 }
                 sort($completedChunks);
             }
 
             $lastChunk = !empty($completedChunks) ? max($completedChunks) : -1;
-            $progreso = $upload->total_chunks > 0
+            $progreso  = $upload->total_chunks > 0
                 ? round((count($completedChunks) / $upload->total_chunks) * 100)
                 : 0;
 
             $archivos['codigo_fuente'] = [
-                'chunk_identifier' => $upload->chunk_identifier,
-                'total_chunks' => $upload->total_chunks ?? 0,
-                'chunks_received' => count($completedChunks),
+                'chunk_identifier'     => $upload->chunk_identifier,
+                'total_chunks'         => $upload->total_chunks ?? 0,
+                'chunks_received'      => count($completedChunks),
                 'last_chunk_completed' => $lastChunk,
-                'completed_chunks' => $completedChunks,
-                'next_chunk' => $lastChunk + 1,
-                'file_name' => $upload->file_name,
-                'file_size' => $upload->file_size ?? 0,
-                'progreso' => $progreso,
-                'directorio_existe' => $directorioExiste,
+                'completed_chunks'     => $completedChunks,
+                'next_chunk'           => $lastChunk + 1,
+                'file_name'            => $upload->file_name,
+                'file_size'            => $upload->file_size ?? 0,
+                'progreso'             => $progreso,
+                'directorio_existe'    => $directorioExiste,
+            ];
+        }
+
+        // ========== ARCHIVO BASE DE DATOS ========== ✅
+        if ($upload->archivo_bd_identifier && !empty($upload->data['archivo_bd_nombre'])) {
+            $chunkDir        = storage_path("app/chunks/{$upload->archivo_bd_identifier}");
+            $completedChunks = [];
+            $directorioExiste = is_dir($chunkDir);
+
+            if ($directorioExiste) {
+                foreach (glob("{$chunkDir}/chunk_*") as $file) {
+                    if (preg_match('/chunk_(\d+)$/', $file, $matches)) {
+                        $completedChunks[] = (int) $matches[1];
+                    }
+                }
+                sort($completedChunks);
+            }
+
+            $lastChunk = !empty($completedChunks) ? max($completedChunks) : -1;
+            $progreso  = $upload->archivo_bd_total_chunks > 0
+                ? round((count($completedChunks) / $upload->archivo_bd_total_chunks) * 100)
+                : 0;
+
+            $archivos['archivo_bd'] = [
+                'chunk_identifier'     => $upload->archivo_bd_identifier,
+                'total_chunks'         => $upload->archivo_bd_total_chunks ?? 0,
+                'chunks_received'      => count($completedChunks),
+                'last_chunk_completed' => $lastChunk,
+                'completed_chunks'     => $completedChunks,
+                'next_chunk'           => $lastChunk + 1,
+                'file_name'            => $upload->data['archivo_bd_nombre'] ?? null,
+                'file_size'            => $upload->data['archivo_bd_tamano'] ?? 0,
+                'progreso'             => $progreso,
+                'directorio_existe'    => $directorioExiste,
             ];
         }
 
         // ========== MANUAL TÉCNICO ==========
         if ($upload->manual_tecnico_identifier && $upload->manual_tecnico_name) {
-            $chunkDir = storage_path("app/chunks/{$upload->manual_tecnico_identifier}");
+            $chunkDir        = storage_path("app/chunks/{$upload->manual_tecnico_identifier}");
             $completedChunks = [];
             $directorioExiste = is_dir($chunkDir);
 
             if ($directorioExiste) {
-                $files = glob("{$chunkDir}/chunk_*");
-                foreach ($files as $file) {
+                foreach (glob("{$chunkDir}/chunk_*") as $file) {
                     if (preg_match('/chunk_(\d+)$/', $file, $matches)) {
-                        $completedChunks[] = (int)$matches[1];
+                        $completedChunks[] = (int) $matches[1];
                     }
                 }
                 sort($completedChunks);
             }
 
             $lastChunk = !empty($completedChunks) ? max($completedChunks) : -1;
-            $progreso = $upload->manual_tecnico_total_chunks > 0
+            $progreso  = $upload->manual_tecnico_total_chunks > 0
                 ? round((count($completedChunks) / $upload->manual_tecnico_total_chunks) * 100)
                 : 0;
 
             $archivos['manual_tecnico'] = [
-                'chunk_identifier' => $upload->manual_tecnico_identifier,
-                'total_chunks' => $upload->manual_tecnico_total_chunks ?? 0,
-                'chunks_received' => count($completedChunks),
+                'chunk_identifier'     => $upload->manual_tecnico_identifier,
+                'total_chunks'         => $upload->manual_tecnico_total_chunks ?? 0,
+                'chunks_received'      => count($completedChunks),
                 'last_chunk_completed' => $lastChunk,
-                'completed_chunks' => $completedChunks,
-                'next_chunk' => $lastChunk + 1,
-                'file_name' => $upload->manual_tecnico_name,
-                'file_size' => $upload->manual_tecnico_size ?? 0,
-                'progreso' => $progreso,
-                'directorio_existe' => $directorioExiste,
+                'completed_chunks'     => $completedChunks,
+                'next_chunk'           => $lastChunk + 1,
+                'file_name'            => $upload->manual_tecnico_name,
+                'file_size'            => $upload->manual_tecnico_size ?? 0,
+                'progreso'             => $progreso,
+                'directorio_existe'    => $directorioExiste,
             ];
         }
 
         // ========== MANUAL USUARIO ==========
         if ($upload->manual_usuario_identifier && $upload->manual_usuario_name) {
-            $chunkDir = storage_path("app/chunks/{$upload->manual_usuario_identifier}");
+            $chunkDir        = storage_path("app/chunks/{$upload->manual_usuario_identifier}");
             $completedChunks = [];
             $directorioExiste = is_dir($chunkDir);
 
             if ($directorioExiste) {
-                $files = glob("{$chunkDir}/chunk_*");
-                foreach ($files as $file) {
+                foreach (glob("{$chunkDir}/chunk_*") as $file) {
                     if (preg_match('/chunk_(\d+)$/', $file, $matches)) {
-                        $completedChunks[] = (int)$matches[1];
+                        $completedChunks[] = (int) $matches[1];
                     }
                 }
                 sort($completedChunks);
             }
 
             $lastChunk = !empty($completedChunks) ? max($completedChunks) : -1;
-            $progreso = $upload->manual_usuario_total_chunks > 0
+            $progreso  = $upload->manual_usuario_total_chunks > 0
                 ? round((count($completedChunks) / $upload->manual_usuario_total_chunks) * 100)
                 : 0;
 
             $archivos['manual_usuario'] = [
-                'chunk_identifier' => $upload->manual_usuario_identifier,
-                'total_chunks' => $upload->manual_usuario_total_chunks ?? 0,
-                'chunks_received' => count($completedChunks),
+                'chunk_identifier'     => $upload->manual_usuario_identifier,
+                'total_chunks'         => $upload->manual_usuario_total_chunks ?? 0,
+                'chunks_received'      => count($completedChunks),
                 'last_chunk_completed' => $lastChunk,
-                'completed_chunks' => $completedChunks,
-                'next_chunk' => $lastChunk + 1,
-                'file_name' => $upload->manual_usuario_name,
-                'file_size' => $upload->manual_usuario_size ?? 0,
-                'progreso' => $progreso,
-                'directorio_existe' => $directorioExiste,
+                'completed_chunks'     => $completedChunks,
+                'next_chunk'           => $lastChunk + 1,
+                'file_name'            => $upload->manual_usuario_name,
+                'file_size'            => $upload->manual_usuario_size ?? 0,
+                'progreso'             => $progreso,
+                'directorio_existe'    => $directorioExiste,
             ];
         }
 
         return response()->json([
-            'upload_id' => $upload->id,
-            'numero_version' => $upload->numero_version,
-            'estado' => $upload->estado,
+            'upload_id'        => $upload->id,
+            'numero_version'   => $upload->numero_version,
+            'estado'           => $upload->estado,
             'progreso_general' => $upload->progreso,
-            'archivos' => $archivos,
-            'is_update' => $upload->data['is_update'] ?? false,
+            'archivos'         => $archivos,
+            'is_update'        => $upload->data['is_update'] ?? false,
         ]);
     }
 

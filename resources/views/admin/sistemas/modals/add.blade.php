@@ -4,7 +4,16 @@
         border: 1px solid #eef0f4;
         box-shadow: 0 12px 30px rgba(0, 0, 0, .05);
     }
+
+    [data-bs-theme="dark"] .bg-soft,
+    .dark .bg-soft,
+    [class*="dark"] .bg-soft {
+        background-color: #1a1d21 !important;
+        border-color: #2d3035 !important;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .2) !important;
+    }
 </style>
+
 <!-- Modal Agregar Sistema -->
 <div class="modal fade" id="addSistemaModal" tabindex="-1" aria-labelledby="addSistemaModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -73,9 +82,10 @@
                                         <span class="input-group-text">
                                             <i class="ti ti-world"></i>
                                         </span>
-                                        <input type="text" class="form-control" name="dominio"
+                                        <input type="text" class="form-control" name="dominio" id="addDominio"
                                             placeholder="Ej. sistema.miempresa.com" required maxlength="150">
                                     </div>
+                                    <small class="text-muted">Sin http:// ni https://</small>
                                     <div class="invalid-feedback">El dominio es obligatorio y debe ser único.</div>
                                 </div>
 
@@ -84,9 +94,7 @@
                                     <label class="form-label fw-semibold d-block mb-2">
                                         Tipo de Sistema <span class="text-danger">*</span>
                                     </label>
-
                                     <div class="d-flex gap-3" id="tipoCheckboxContainer">
-                                        <!-- Checkbox Interno -->
                                         <div class="form-check">
                                             <input class="form-check-input tipo-checkbox" type="checkbox" name="tipo[]"
                                                 value="interno" id="tipo-interno" checked>
@@ -95,8 +103,6 @@
                                                 <strong>Interno</strong>
                                             </label>
                                         </div>
-
-                                        <!-- Checkbox Externo -->
                                         <div class="form-check">
                                             <input class="form-check-input tipo-checkbox" type="checkbox" name="tipo[]"
                                                 value="externo" id="tipo-externo">
@@ -106,8 +112,6 @@
                                             </label>
                                         </div>
                                     </div>
-
-                                    <!-- Mensaje de error -->
                                     <small class="text-danger" id="tipoError" style="display: none;">
                                         Debes seleccionar al menos un tipo de sistema.
                                     </small>
@@ -118,14 +122,12 @@
                                     <label class="form-label fw-semibold d-block">
                                         Estado <span class="text-danger">*</span>
                                     </label>
-
                                     <div class="btn-group w-100" role="group" aria-label="Estado">
                                         <input type="radio" class="btn-check" name="estado" id="estado-activo"
                                             value="activo" checked>
                                         <label class="btn btn-outline-secondary" for="estado-activo">
                                             <i class="ti ti-check me-1"></i> Activo
                                         </label>
-
                                         <input type="radio" class="btn-check" name="estado" id="estado-inactivo"
                                             value="inactivo">
                                         <label class="btn btn-outline-danger" for="estado-inactivo">
@@ -135,7 +137,7 @@
                                 </div>
 
                                 <!-- Unidad -->
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <label class="form-label fw-semibold">
                                         Unidad Organizacional <span class="text-danger">*</span>
                                     </label>
@@ -154,10 +156,9 @@
                                 </div>
 
                                 <!-- SSL (Opcional) -->
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <label class="form-label fw-semibold">
-                                        Certificado SSL
-                                        <span class="text-muted">(Opcional)</span>
+                                        Certificado SSL <span class="text-muted">(Opcional)</span>
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text">
@@ -177,6 +178,22 @@
                                     <small class="text-muted">Asociar un certificado SSL existente</small>
                                 </div>
 
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">
+                                        Descripción <span class="text-muted">(Opcional)</span>
+                                    </label>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="ti ti-align-left"></i>
+                                        </span>
+                                        <textarea class="form-control" name="descripcion" rows="3"
+                                            placeholder="Ej. Sistema para gestión de usuarios internos..."></textarea>
+                                    </div>
+
+                                    <small class="text-muted">Descripción breve del sistema</small>
+                                </div>
+
                             </div>
                         </div>
 
@@ -187,18 +204,13 @@
                                     <i class="ti ti-info-circle me-1"></i>
                                     Vista Previa
                                 </h6>
-
-                                <!-- Preview Unidad -->
                                 <div id="addUnidadPreview">
                                     <div class="text-center text-muted py-4">
                                         <i class="ti ti-building-off fs-1 opacity-50"></i>
                                         <p class="mb-0 mt-2 small">Selecciona una unidad para ver sus responsables</p>
                                     </div>
                                 </div>
-
                                 <hr class="my-3">
-
-                                <!-- Preview SSL -->
                                 <div id="addSslPreview">
                                     <div class="text-center text-muted py-4">
                                         <i class="ti ti-shield-off fs-1 opacity-50"></i>
@@ -212,9 +224,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">
                         <i class="ti ti-device-floppy me-1"></i>
                         Guardar Sistema
@@ -228,12 +238,36 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        // Auto-uppercase en sigla
+        // ── Helper: quitar protocolo del dominio ──────────────────────────────
+        function limpiarDominio(valor) {
+            return valor
+                .replace(/^https?:\/\//i, '')
+                .replace(/^\/\//, '')
+                .trim();
+        }
+
+        // ── Auto-uppercase en sigla ───────────────────────────────────────────
         document.querySelector('[name="sigla"]')?.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
         });
 
-        // Preview de Unidad al seleccionar
+        // ── Limpiar protocolo al escribir (addDominio) ────────────────────────
+        document.getElementById('addDominio')?.addEventListener('input', function() {
+            const pos = this.selectionStart;
+            this.value = limpiarDominio(this.value);
+            // Restaurar cursor si es posible
+            try {
+                this.setSelectionRange(pos, pos);
+            } catch (e) {}
+        });
+
+        document.getElementById('addDominio')?.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const texto = (e.clipboardData || window.clipboardData).getData('text');
+            this.value = limpiarDominio(texto);
+        });
+
+        // ── Preview de Unidad al seleccionar ─────────────────────────────────
         document.getElementById('addUnidadId')?.addEventListener('change', async function() {
             const unidadId = this.value;
             const previewContainer = document.getElementById('addUnidadPreview');
@@ -243,8 +277,7 @@
                 <div class="text-center text-muted py-4">
                     <i class="ti ti-building-off fs-1 opacity-50"></i>
                     <p class="mb-0 mt-2 small">Selecciona una unidad organizacional para ver sus responsables</p>
-                </div>
-            `;
+                </div>`;
                 return;
             }
 
@@ -253,8 +286,7 @@
                 <div class="spinner-border spinner-border-lg text-black" role="status">
                     <span class="visually-hidden">Cargando...</span>
                 </div>
-            </div>
-        `;
+            </div>`;
 
             try {
                 const response = await fetch(`/admin/unidades/${unidadId}/detalle`);
@@ -262,43 +294,30 @@
 
                 if (data.success) {
                     const unidad = data.unidad;
-
                     let html = `
-        <div class="mb-3">
-            <span class="text-muted small">Unidad Organizacional seleccionada</span>
-            <div class="fw-semibold">${unidad.nombre}</div>
-            ${unidad.codigo ? `<div class="text-muted small">${unidad.codigo}</div>` : ''}
-        </div>
-        `;
+                    <div class="mb-3">
+                        <span class="text-muted small">Unidad Organizacional seleccionada</span>
+                        <div class="fw-semibold">${unidad.nombre}</div>
+                        ${unidad.codigo ? `<div class="text-muted small">${unidad.codigo}</div>` : ''}
+                    </div>`;
 
                     if (data.responsables?.length) {
                         html += `
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <span class="text-muted small">Responsables</span>
-        <span class="badge bg-secondary-subtle text-secondary">
-            ${data.responsables.length}
-        </span>
-    </div>
-
-    <div class="d-flex flex-wrap gap-2">
-    `;
-
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">Responsables</span>
+                        <span class="badge bg-secondary-subtle text-secondary">${data.responsables.length}</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">`;
                         data.responsables.forEach(resp => {
-                            html += `
-                    <span class="badge bg-dark">                        
-                        ${resp.nombre}
-                    </span>
-                `;
+                            html += `<span class="badge bg-dark">${resp.nombre}</span>`;
                         });
-
                         html += `</div>`;
                     } else {
                         html += `
-            <div class="bg-body-tertiary border rounded-3 p-3 text-center text-muted small">
-                <i class="ti ti-user-off d-block mb-1"></i>
-                Sin responsables asignados
-            </div>
-            `;
+                    <div class="bg-body-tertiary border rounded-3 p-3 text-center text-muted small">
+                        <i class="ti ti-user-off d-block mb-1"></i>
+                        Sin responsables asignados
+                    </div>`;
                     }
 
                     previewContainer.innerHTML = html;
@@ -309,12 +328,11 @@
                 <div class="bg-body-tertiary border rounded-3 p-3 text-center text-muted small">
                     <i class="ti ti-alert-circle d-block mb-1"></i>
                     No se pudo cargar la información
-                </div>
-                `;
+                </div>`;
             }
         });
 
-        // Preview de SSL al seleccionar
+        // ── Preview de SSL al seleccionar ─────────────────────────────────────
         document.getElementById('addSslId')?.addEventListener('change', async function() {
             const sslId = this.value;
             const previewContainer = document.getElementById('addSslPreview');
@@ -324,8 +342,7 @@
                 <div class="text-center text-muted py-4">
                     <i class="ti ti-shield-off fs-1 opacity-50"></i>
                     <p class="mb-0 mt-2 small">Selecciona un SSL para ver su estado</p>
-                </div>
-            `;
+                </div>`;
                 return;
             }
 
@@ -334,8 +351,7 @@
                 <div class="spinner-border spinner-border-lg text-dark" role="status">
                     <span class="visually-hidden">Cargando...</span>
                 </div>
-            </div>
-        `;
+            </div>`;
 
             try {
                 const response = await fetch(`/admin/ssls/${sslId}/detalle`);
@@ -382,7 +398,6 @@
                         <label class="text-muted small">Certificado SSL</label>
                         <div class="fw-semibold">${ssl.emisor}</div>
                     </div>
-                    
                     <div class="card border-${estadoClass} bg-${estadoClass} bg-opacity-10 mb-2">
                         <div class="card-body p-2">
                             <div class="d-flex align-items-center justify-content-between">
@@ -399,21 +414,16 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
 
                     if (diasRestantes <= 30 && diasRestantes >= 0) {
-                        html += `
-                        <div class="alert alert-warning py-2 mb-0">
-                            <small><i class="ti ti-info-circle me-1"></i>Considera renovar pronto</small>
-                        </div>
-                    `;
+                        html += `<div class="alert alert-warning py-2 mb-0">
+                        <small><i class="ti ti-info-circle me-1"></i>Considera renovar pronto</small>
+                    </div>`;
                     } else if (diasRestantes < 0) {
-                        html += `
-                        <div class="alert alert-danger py-2 mb-0">
-                            <small><i class="ti ti-alert-triangle me-1"></i>Requiere renovación inmediata</small>
-                        </div>
-                    `;
+                        html += `<div class="alert alert-danger py-2 mb-0">
+                        <small><i class="ti ti-alert-triangle me-1"></i>Requiere renovación inmediata</small>
+                    </div>`;
                     }
 
                     previewContainer.innerHTML = html;
@@ -423,9 +433,9 @@
                 previewContainer.innerHTML = `
                 <div class="alert alert-danger py-2">
                     <small>Error al cargar información</small>
-                </div>
-            `;
+                </div>`;
             }
         });
+
     });
 </script>

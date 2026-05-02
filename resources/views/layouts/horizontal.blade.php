@@ -7,11 +7,12 @@
     @include('layouts.partials/head-css')
 </head>
 
+
 <body>
     <div class="wrapper">
 
         @include('layouts.partials/topbar')
-        
+
         @include('layouts.partials/horizontal-nav')
 
         <div class="content-page">

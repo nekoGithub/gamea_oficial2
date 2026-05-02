@@ -9,6 +9,16 @@ use Illuminate\Http\Request;
 
 class SistemaController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin.sistemas.index')->only('index');
+        $this->middleware('can:admin.sistemas.store')->only('store');
+        $this->middleware('can:admin.sistemas.edit')->only('edit');
+        $this->middleware('can:admin.sistemas.update')->only('update');
+        $this->middleware('can:admin.sistemas.destroy')->only('destroy');
+        $this->middleware('can:admin.sistemas.restore')->only('restore');
+    }
+
     public function index()
     {
         $sistemas = Sistema::with(['unidad', 'ssl'])
@@ -42,9 +52,10 @@ class SistemaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:150',
-            'sigla' => 'nullable|string|max:20|unique:sistemas,sigla', // ← NUEVO
-            'dominio' => 'required|string|max:150|unique:sistemas,dominio',
+            'nombre' => 'required|string|max:80',
+            'sigla' => 'nullable|string|max:20|unique:sistemas,sigla',
+            'dominio' => 'required|string|max:120|unique:sistemas,dominio',
+            'descripcion' => 'nullable|string',
             'tipo' => 'required|array|min:1',
             'tipo.*' => 'in:interno,externo',
             'unidad_id' => 'required|exists:unidades,id',
@@ -52,11 +63,11 @@ class SistemaController extends Controller
             'estado' => 'required|in:activo,inactivo',
         ], [
             'nombre.required' => 'El nombre del sistema es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 150 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 80 caracteres.',
             'sigla.max' => 'La sigla no puede exceder 20 caracteres.',
             'sigla.unique' => 'Esta sigla ya está registrada.',
             'dominio.required' => 'El dominio es obligatorio.',
-            'dominio.max' => 'El dominio no puede exceder 150 caracteres.',
+            'dominio.max' => 'El dominio no puede exceder 120 caracteres.',
             'dominio.unique' => 'Este dominio ya está registrado.',
             'tipo.required' => 'El tipo de sistema es obligatorio.',
             'tipo.in' => 'El tipo debe ser interno o externo.',
@@ -93,21 +104,22 @@ class SistemaController extends Controller
     public function update(Request $request, Sistema $sistema)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:150',
-            'sigla' => 'nullable|string|max:20|unique:sistemas,sigla,' . $sistema->id, // ← NUEVO
-            'dominio' => 'required|string|max:150|unique:sistemas,dominio,' . $sistema->id,
-            'tipo' => 'required|array|min:1', 
+            'nombre' => 'required|string|max:80',
+            'sigla' => 'nullable|string|max:20|unique:sistemas,sigla,' . $sistema->id,
+            'dominio' => 'required|string|max:120|unique:sistemas,dominio,' . $sistema->id,
+            'descripcion' => 'nullable|string',
+            'tipo' => 'required|array|min:1',
             'tipo.*' => 'in:interno,externo',
             'unidad_id' => 'required|exists:unidades,id',
             'ssl_id' => 'nullable|exists:ssls,id',
             'estado' => 'required|in:activo,inactivo',
         ], [
             'nombre.required' => 'El nombre del sistema es obligatorio.',
-            'nombre.max' => 'El nombre no puede exceder 150 caracteres.',
+            'nombre.max' => 'El nombre no puede exceder 80 caracteres.',
             'sigla.max' => 'La sigla no puede exceder 20 caracteres.',
             'sigla.unique' => 'Esta sigla ya está registrada.',
             'dominio.required' => 'El dominio es obligatorio.',
-            'dominio.max' => 'El dominio no puede exceder 150 caracteres.',
+            'dominio.max' => 'El dominio no puede exceder 120 caracteres.',
             'dominio.unique' => 'Este dominio ya está registrado.',
             'tipo.required' => 'El tipo de sistema es obligatorio.',
             'tipo.in' => 'El tipo debe ser interno o externo.',

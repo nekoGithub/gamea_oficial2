@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('credenciales', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('sistema_id')->constrained('sistemas')->onDelete('cascade');
             $table->string('usuario', 150);
             $table->text('password_encrypted');
-            $table->string('url_acceso', 255);
             $table->enum('estado', ['activo', 'inactivo'])->default('activo');
 
             $table->timestamps();

@@ -39,7 +39,7 @@
                                 Versión <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" name="version" 
-                                   placeholder="Ej. 8.0, 14.5, 6.0" required maxlength="50">
+                                   placeholder="Ej. 8.0, 14.5, 6.0" required maxlength="10">
                             <div class="invalid-feedback">La versión es obligatoria.</div>
                         </div>
 

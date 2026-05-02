@@ -40,7 +40,7 @@
                                 Nombre del Servidor <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="editNombre" name="nombre" required
-                                maxlength="150">
+                                maxlength="45">
                             <div class="invalid-feedback">El nombre es obligatorio.</div>
                         </div>
 
@@ -99,6 +99,22 @@
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Seleccione un sistema operativo.</div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">
+                                Descripción <span class="text-muted">(Opcional)</span>
+                            </label>
+
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="ti ti-align-left"></i>
+                                </span>
+                                <textarea class="form-control" id="editDescripcion" name="descripcion" rows="3"
+                                    placeholder="Ej. Servidor principal para aplicaciones web..."></textarea>
+                            </div>
+
+                            <small class="text-muted">Descripción del servidor</small>
                         </div>
 
                         <!-- Tipo -->

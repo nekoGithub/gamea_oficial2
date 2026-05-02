@@ -11,7 +11,7 @@ class Responsable extends Model
 
     protected $table = 'responsables';
 
-    protected $fillable = ['nombre', 'cargo', 'email'];
+    protected $fillable = ['nombre', 'cargo', 'email','celular'];
 
     public function unidades()
     {

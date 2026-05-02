@@ -33,10 +33,12 @@
 
                         <div class="card-header border-light justify-content-between">
                             <h4 class="card-title mb-0">Gestores de Bases de Datos</h4>
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBaseDatosModal"
-                                href="#">
-                                <i class="ti ti-plus me-1"></i> Agregar Base de Datos
-                            </a>
+                            @can('admin.bases-datos.store')
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBaseDatosModal"
+                                    href="#">
+                                    <i class="ti ti-plus me-1"></i> Agregar Base de Datos
+                                </a>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -138,16 +140,20 @@
                                                 <td>{{ $bd->created_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle edit-bd-btn"
-                                                            data-id="{{ $bd->id }}">
-                                                            <i class="ti ti-edit fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle delete-bd-btn"
-                                                            data-id="{{ $bd->id }}">
-                                                            <i class="ti ti-trash fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.bases-datos.edit')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle edit-bd-btn"
+                                                                data-id="{{ $bd->id }}">
+                                                                <i class="ti ti-edit fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.bases-datos.destroy')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle delete-bd-btn"
+                                                                data-id="{{ $bd->id }}">
+                                                                <i class="ti ti-trash fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -240,11 +246,13 @@
                                                 <td>{{ $bd->deleted_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle restore-bd-btn"
-                                                            data-id="{{ $bd->id }}">
-                                                            <i class="ti ti-rotate fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.bases-datos.restore')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle restore-bd-btn"
+                                                                data-id="{{ $bd->id }}">
+                                                                <i class="ti ti-rotate fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -270,6 +278,12 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/js/datatables/datatables-bases-datos.js'])
+
+    <script>
+        const canEdit = @json(auth()->user()?->can('admin.bases-datos.edit') ?? false);
+        const canDestroy = @json(auth()->user()?->can('admin.bases-datos.destroy') ?? false);
+        const canRestore = @json(auth()->user()?->can('admin.bases-datos.restore') ?? false);
+    </script>
 
     <script>
         /* ==================== FUNCIONES DE UTILIDAD ==================== */
@@ -302,24 +316,21 @@
         }
 
         function accionesActivos(id) {
-            return `
-                <div class="d-flex justify-content-center gap-1">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-bd-btn" data-id="${id}">
-                        <i class="ti ti-edit fs-lg"></i>
-                    </a>
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-bd-btn" data-id="${id}">
-                        <i class="ti ti-trash fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (canEdit) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-bd-btn" data-id="${id}"><i class="ti ti-edit fs-lg"></i></a>`;
+            if (canDestroy) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-bd-btn" data-id="${id}"><i class="ti ti-trash fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         function accionesPapelera(id) {
-            return `
-                <div class="d-flex justify-content-center">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-bd-btn" data-id="${id}">
-                        <i class="ti ti-rotate fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center">';
+            if (canRestore) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-bd-btn" data-id="${id}"><i class="ti ti-rotate fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         /* ==================== LÓGICA PRINCIPAL ==================== */

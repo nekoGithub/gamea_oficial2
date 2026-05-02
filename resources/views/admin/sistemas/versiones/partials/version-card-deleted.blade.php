@@ -1,13 +1,11 @@
 <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
     <div class="card version-card h-100 border-secondary bg-light bg-opacity-10">
         <div class="card-body text-center position-relative opacity-75">
-            
+
             {{-- Avatar/Imagen con filtro gris --}}
             <div class="mb-3">
-                <img src="{{ $version->imagen_url }}" 
-                     alt="Versión {{ $version->numero_version }}" 
-                     class="version-avatar"
-                     style="filter: grayscale(100%);">
+                <img src="{{ $version->imagen_url }}" alt="Versión {{ $version->numero_version }}" class="version-avatar"
+                    style="filter: grayscale(100%);">
             </div>
 
             {{-- Número de Versión --}}
@@ -21,7 +19,7 @@
             </p>
 
             {{-- Descripción --}}
-            @if($version->descripcion)
+            @if ($version->descripcion)
                 <p class="text-muted small mb-3">
                     {{ Str::limit($version->descripcion, 50) }}
                 </p>
@@ -35,10 +33,11 @@
 
             {{-- Botón de Restaurar --}}
             <div class="action-buttons mb-3">
-                <button class="btn btn-sm btn-outline-primary restore-version-btn" 
-                        data-id="{{ $version->id }}">
-                    <i class="ti ti-rotate me-1"></i> Restaurar
-                </button>
+                @can('admin.versiones.restore')
+                    <button class="btn btn-sm btn-outline-primary restore-version-btn" data-id="{{ $version->id }}">
+                        <i class="ti ti-rotate me-1"></i> Restaurar
+                    </button>
+                @endcan
             </div>
 
             {{-- Fecha eliminación --}}

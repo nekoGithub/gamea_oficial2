@@ -33,10 +33,12 @@
 
                         <div class="card-header border-light justify-content-between">
                             <h4 class="card-title mb-0">Sistemas Operativos</h4>
-                            <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSistemaOperativoModal"
-                                href="#">
-                                <i class="ti ti-plus me-1"></i> Agregar Sistema Operativo
-                            </a>
+                            @can('admin.sistemas-operativos.store')
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSistemaOperativoModal"
+                                    href="#">
+                                    <i class="ti ti-plus me-1"></i> Agregar Sistema Operativo
+                                </a>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -132,16 +134,20 @@
                                                 <td>{{ $so->created_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle edit-so-btn"
-                                                            data-id="{{ $so->id }}">
-                                                            <i class="ti ti-edit fs-lg"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle delete-so-btn"
-                                                            data-id="{{ $so->id }}">
-                                                            <i class="ti ti-trash fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.sistemas-operativos.edit')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle edit-so-btn"
+                                                                data-id="{{ $so->id }}">
+                                                                <i class="ti ti-edit fs-lg"></i>
+                                                            </a>
+                                                        @endcan
+                                                        @can('admin.sistemas-operativos.destroy')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle delete-so-btn"
+                                                                data-id="{{ $so->id }}">
+                                                                <i class="ti ti-trash fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -229,11 +235,13 @@
                                                 <td>{{ $so->deleted_at->format('d M, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-1">
-                                                        <a href="#"
-                                                            class="btn btn-default btn-icon btn-sm rounded-circle restore-so-btn"
-                                                            data-id="{{ $so->id }}">
-                                                            <i class="ti ti-rotate fs-lg"></i>
-                                                        </a>
+                                                        @can('admin.sistemas-operativos.restore')
+                                                            <a href="#"
+                                                                class="btn btn-default btn-icon btn-sm rounded-circle restore-so-btn"
+                                                                data-id="{{ $so->id }}">
+                                                                <i class="ti ti-rotate fs-lg"></i>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>
@@ -261,6 +269,12 @@
     @vite(['resources/js/datatables/datatables-sistemas-operativos.js'])
 
     <script>
+        const canEdit = @json(auth()->user()?->can('admin.sistemas-operativos.edit') ?? false);
+        const canDestroy = @json(auth()->user()?->can('admin.sistemas-operativos.destroy') ?? false);
+        const canRestore = @json(auth()->user()?->can('admin.sistemas-operativos.restore') ?? false);
+    </script>
+
+    <script>
         /* ==================== FUNCIONES DE UTILIDAD ==================== */
 
         function getEstadoBadge(estado) {
@@ -283,24 +297,21 @@
         }
 
         function accionesActivos(id) {
-            return `
-                <div class="d-flex justify-content-center gap-1">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-so-btn" data-id="${id}">
-                        <i class="ti ti-edit fs-lg"></i>
-                    </a>
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-so-btn" data-id="${id}">
-                        <i class="ti ti-trash fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center gap-1">';
+            if (canEdit) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle edit-so-btn" data-id="${id}"><i class="ti ti-edit fs-lg"></i></a>`;
+            if (canDestroy) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle delete-so-btn" data-id="${id}"><i class="ti ti-trash fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         function accionesPapelera(id) {
-            return `
-                <div class="d-flex justify-content-center">
-                    <a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-so-btn" data-id="${id}">
-                        <i class="ti ti-rotate fs-lg"></i>
-                    </a>
-                </div>`;
+            let btns = '<div class="d-flex justify-content-center">';
+            if (canRestore) btns +=
+                `<a href="#" class="btn btn-default btn-icon btn-sm rounded-circle restore-so-btn" data-id="${id}"><i class="ti ti-rotate fs-lg"></i></a>`;
+            btns += '</div>';
+            return btns;
         }
 
         /* ==================== LÓGICA PRINCIPAL ==================== */

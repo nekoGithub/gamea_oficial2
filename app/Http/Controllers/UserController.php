@@ -33,7 +33,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => [
                 'required',
@@ -43,6 +43,7 @@ class UserController extends Controller
                 'regex:/[a-z]/',
                 'regex:/[0-9]/',
                 'regex:/[@$!%*?&]/',
+                'max:100',
             ],
             'avatar' => ['nullable', 'image', 'max:2048'],
             'role' => ['required', 'string', 'exists:roles,name'],
@@ -54,6 +55,7 @@ class UserController extends Controller
             'password.required' => 'La contraseña es obligatoria',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres',
             'password.regex' => 'La contraseña debe contener mayúscula, minúscula, número y carácter especial',
+            'password.max' => 'La contraseña no debe superar los 100 caracteres',
             'role.required' => 'Debes seleccionar un rol',
             'role.exists' => 'El rol seleccionado no es válido',
         ]);
@@ -80,7 +82,11 @@ class UserController extends Controller
         $user->email_verification_expires_at = Carbon::now()->addMinutes(10);
         $user->save();
 
-        Mail::to($user->email)->send(new EmailVerificationCodeMail($code));
+        try {
+            Mail::to($user->email)->send(new EmailVerificationCodeMail($code));
+        } catch (\Exception $e) {
+            Log::warning("No se pudo enviar correo de verificación al usuario {$user->id}: " . $e->getMessage());
+        }
         // ========================================
 
         $user->assignRole($validated['role']);
@@ -124,7 +130,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:50'],
             'email' => ["required", "email", "unique:users,email,{$user->id}"],
             'password' => [
                 'nullable',
@@ -134,6 +140,7 @@ class UserController extends Controller
                 'regex:/[a-z]/',
                 'regex:/[0-9]/',
                 'regex:/[@$!%*?&]/',
+                'max:100',
             ],
             'avatar' => ['nullable', 'image', 'max:2048'],
             'role' => ['required', 'string', 'exists:roles,name']
@@ -144,6 +151,7 @@ class UserController extends Controller
             'email.unique' => 'Este correo ya está registrado',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres',
             'password.regex' => 'La contraseña debe contener mayúscula, minúscula, número y carácter especial',
+            'password.max' => 'La contraseña no debe superar los 100 caracteres',
             'role.required' => 'Debes seleccionar un rol',
             'role.exists' => 'El rol seleccionado no es válido',
         ]);
@@ -187,5 +195,14 @@ class UserController extends Controller
         $user = User::withTrashed()->findOrFail($id);
         $user->restore();
         return response()->json(['message' => 'Usuario restaurado correctamente']);
+    }
+
+    public function checkEmail(Request $request)
+    {
+        $exists = User::withTrashed()
+            ->where('email', $request->email)
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
     }
 }

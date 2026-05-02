@@ -15,7 +15,7 @@
                 <input type="hidden" id="editResponsableId">
 
                 <div class="modal-body">
-                    
+
                     <div class="mb-3">
                         <small class="text-muted">
                             <span class="text-danger">*</span> Campos obligatorios
@@ -40,12 +40,19 @@
                             <div class="invalid-feedback">El cargo es obligatorio.</div>
                         </div>
 
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">
-                                Email <span class="text-danger">*</span>
+                                Email <span>(Opcional)</span>
                             </label>
-                            <input type="email" class="form-control" id="editEmail" name="email" required>
+                            <input type="email" class="form-control" id="editEmail" name="email">
                             <div class="invalid-feedback">El email es obligatorio y debe ser válido.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Celular <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="editCelular" name="celular" required>
+                            <div class="invalid-feedback">El celular es obligatorio.</div>
                         </div>
 
                     </div>
